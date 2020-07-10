@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Use Node 11.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 11.x
+    
+    - run: npm ci
+    
+    - run: npm run build
+
+    # dist is in gitignore, so need to copy it to another dir before publish
+    - run: mkdir public
+    - run: cp -r dist/. public
+    
+    - name: Deploy GH Pages
+      uses: peaceiris/actions-gh-pages@v3.6.1
+      if: ${{ github.event_name == 'push' }}
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
