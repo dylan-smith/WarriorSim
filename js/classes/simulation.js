@@ -1,23 +1,24 @@
-var RESULT = {
-    HIT: 0,
-    MISS: 1,
-    DODGE: 2,
-    CRIT: 3,
-    GLANCE: 4
-}
+import { spells } from '../data/spells.js';
+import { step, rng, incrementStep, resetStep } from './utility.js';
 
-var step = 0;
 var log = false;
-var version = 3;
+export var version = 3;
 
-class Simulation {
-    constructor(player, callback_finished, callback_update) {
+export class Simulation {
+    constructor(player, callback_finished, callback_update, options) {
+        options = options || {};
+        options.timesecsmin = options.timesecsmin || 50;
+        options.timesecsmax = options.timesecsmax || 60;
+        options.executeperc = options.executeperc || 20;
+        options.startrage = options.startrage || 0;
+        options.simulations = options.simulations || 100;
+
         this.player = player;
-        this.timesecsmin = parseInt($('input[name="timesecsmin"]').val());
-        this.timesecsmax = parseInt($('input[name="timesecsmax"]').val());
-        this.executeperc = parseInt($('input[name="executeperc"]').val());
-        this.startrage = parseInt($('input[name="startrage"]').val());
-        this.iterations = parseInt($('input[name="simulations"]').val());
+        this.timesecsmin = options.timesecsmin;
+        this.timesecsmax = options.timesecsmax;
+        this.executeperc = options.executeperc;
+        this.startrage = options.startrage;
+        this.iterations = options.simulations;
         this.idmg = 0;
         this.totaldmg = 0;
         this.totalduration = 0;
@@ -39,7 +40,7 @@ class Simulation {
         this.starttime = new Date().getTime();
     }
     run(iteration) {
-        step = 0;
+        resetStep();
         this.idmg = 0;
         let player = this.player;
         player.reset(this.startrage);
@@ -231,7 +232,7 @@ class Simulation {
             }
 
             // if (next == 0) { debugger; break; } // Something went wrong!
-            step += next;
+            incrementStep(next);
             player.mh.step(next);
             if (player.oh) player.oh.step(next);
             if (player.timer && player.steptimer(next) && !player.spelldelay) spellcheck = true;
@@ -280,14 +281,4 @@ class Simulation {
     }
 }
 
-function rng(min, max) {
-    return ~~(Math.random() * (max - min + 1) + min);
-}
 
-function rng10k() {
-    return ~~(Math.random() * 10000);
-}
-
-function avg(min, max) {
-    return (min + max) / 2;
-}

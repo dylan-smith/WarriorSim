@@ -1,4 +1,4 @@
-var gear = {
+export var gear = {
    "head": [
       {
          "name": "Eye of Rend",
@@ -6365,7 +6365,7 @@ var gear = {
    ]
 };
 
-var enchant = {
+export var enchant = {
    "head": [
       {
          "id": 18329,
@@ -6723,7 +6723,7 @@ var enchant = {
    ],
 };
 
-var sets = [
+export var sets = [
    {
       id: 143,
       name: 'Devilsaur Armor',

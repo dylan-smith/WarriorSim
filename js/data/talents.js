@@ -1,4 +1,4 @@
-var talents = [
+export var talents = [
    {
       n: 'Arms',
       t: [

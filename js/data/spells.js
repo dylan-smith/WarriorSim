@@ -1,4 +1,4 @@
-var spells = [
+export var spells = [
 {
     id: 23894,
     name: 'Bloodthirst',

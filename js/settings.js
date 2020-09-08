@@ -1,6 +1,9 @@
-var SIM = SIM || {}
+import { spells } from './data/spells.js';
+import { buffs } from './data/buffs.js';
+import { talents } from './data/talents.js';
+import { UI } from './ui.js';
 
-SIM.SETTINGS = {
+export var SETTINGS = {
 
     init: function () {
         var view = this;
@@ -43,8 +46,8 @@ SIM.SETTINGS = {
             for (let buff of buffs) {
                 buff.active = view.buffs.find('[data-id="' + buff.id + '"]').hasClass('active');
             }
-            SIM.UI.updateSession();
-            SIM.UI.updateSidebar();
+            UI.updateSession();
+            UI.updateSidebar();
         });
 
         view.talents.on('click', '.icon', function (e) {
@@ -55,8 +58,8 @@ SIM.SETTINGS = {
             if (talent.enable)
                 $('.rotation [data-id="' + talent.enable + '"]').removeClass('hidden');
             $(this).find('a').attr('href', 'https://classic.wowhead.com/spell=' + talent.s[talent.c == 0 ? 0 : talent.c - 1]);
-            SIM.UI.updateSession();
-            SIM.UI.updateSidebar();
+            UI.updateSession();
+            UI.updateSidebar();
         });
 
         view.talents.on('contextmenu', '.icon', function (e) {
@@ -72,8 +75,8 @@ SIM.SETTINGS = {
                         spell.active = false;
             }
             $(this).find('a').attr('href', 'https://classic.wowhead.com/spell=' + talent.s[talent.c == 0 ? 0 : talent.c - 1]);
-            SIM.UI.updateSession();
-            SIM.UI.updateSidebar();
+            UI.updateSession();
+            UI.updateSidebar();
         });
 
         view.filter.on('click', '.sources li', function (e) {
@@ -82,8 +85,8 @@ SIM.SETTINGS = {
                 let id = $(this).data('id');
                 view.filter.find(`.phases [data-sources*="${id}"]`).addClass('active');
             }
-            SIM.UI.updateSession();
-            SIM.UI.filterGear();
+            UI.updateSession();
+            UI.filterGear();
         });
 
         view.filter.on('click', '.phases li', function (e) {
@@ -94,8 +97,8 @@ SIM.SETTINGS = {
                 if (show) view.filter.find('.sources [data-id="' + source + '"]').addClass('active');
                 else view.filter.find('.sources [data-id="' + source + '"]').removeClass('active');
             }
-            SIM.UI.updateSession();
-            SIM.UI.filterGear();
+            UI.updateSession();
+            UI.filterGear();
         });
 
         view.rotation.on('click', '.spell', function (e) {
@@ -108,7 +111,7 @@ SIM.SETTINGS = {
                 if (spell.id == id)
                     spell.active = $(this).hasClass('active');
             }
-            SIM.UI.updateSession();
+            UI.updateSession();
         });
 
         view.rotation.on('keyup', 'input[type="text"]', function (e) {
@@ -117,7 +120,7 @@ SIM.SETTINGS = {
                 if (spell.id == id)
                     spell[$(this).attr('name')] = $(this).val();
             }
-            SIM.UI.updateSession();
+            UI.updateSession();
         });
 
         view.fight.on('change', 'select[name="race"]', function (e) {
@@ -148,23 +151,23 @@ SIM.SETTINGS = {
 
             view.bg.attr('data-race', val);
 
-            SIM.UI.updateSession();
-            SIM.UI.updateSidebar();
+            UI.updateSession();
+            UI.updateSidebar();
         });
 
         view.fight.on('change', 'select[name="aqbooks"]', function (e) {
-            SIM.UI.updateSession();
-            SIM.UI.updateSidebar();
+            UI.updateSession();
+            UI.updateSidebar();
         });
 
         view.fight.on('keyup', 'input[type="text"]', function (e) {
-            SIM.UI.updateSession();
-            SIM.UI.updateSidebar();
+            UI.updateSession();
+            UI.updateSidebar();
         });
 
         view.fight.on('change', 'select[name="weaponrng"]', function (e) {
-            SIM.UI.updateSession();
-            SIM.UI.updateSidebar();
+            UI.updateSession();
+            UI.updateSidebar();
         });
 
     },

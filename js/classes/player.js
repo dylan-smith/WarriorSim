@@ -1,5 +1,30 @@
-class Player {
-    constructor(testItem, testType, enchtype) {
+import { races } from '../data/races.js';
+import { talents } from '../data/talents.js';
+import { gear, enchant, sets } from '../data/gear.js';
+import { Weapon } from './weapon.js';
+import { buffs } from '../data/buffs.js';
+import { spells } from '../data/spells.js';
+import { rng, rng10k, avg } from './utility.js';
+import * as spellclasses from './spell.js';
+
+export var RESULT = {
+    HIT: 0,
+    MISS: 1,
+    DODGE: 2,
+    CRIT: 3,
+    GLANCE: 4
+}
+
+export class Player {
+    constructor(testItem, testType, enchtype, options) {
+        options = options || {};
+        options.aqbooks = options.aqbooks || false;
+        options.weaponrng = options.weaponrng || true;
+        options.targetlevel = options.targetlevel || 63;
+        options.targetarmor = options.targetarmor || 336;
+        options.targetresistance = options.targetresistance || 24;
+        options.racename = options.racename || 'Human';
+
         this.rage = 0;
         this.level = 60;
         this.timer = 0;
@@ -9,9 +34,9 @@ class Player {
         this.batchedextras = 0;
         this.nextswinghs = false;
         this.nextswingcl = false;
-        this.aqbooks = $('select[name="aqbooks"]').val() == "Yes";
-        this.weaponrng = $('select[name="weaponrng"]').val() == "Yes";
-        this.spelldamage = parseInt($('input[name="spelldamage"]').val());
+        this.aqbooks = options.aqbooks;
+        this.weaponrng = options.weaponrng;
+        this.spelldamage = options.spelldamage;
         if (enchtype == 1) {
             this.testEnch = testItem;
             this.testEnchType = testType;
@@ -25,12 +50,12 @@ class Player {
             this.testItemType = testType;
         }
         this.target = {
-            level: parseInt($('input[name="targetlevel"]').val()),
-            basearmor: parseInt($('input[name="targetarmor"]').val()),
-            armor: parseInt($('input[name="targetarmor"]').val()),
-            defense: parseInt($('input[name="targetlevel"]').val()) * 5,
-            mitigation: 1 - 15 * (parseInt($('input[name="targetresistance"]').val()) / 6000),
-            binaryresist: parseInt(10000 - (8300 * (1 - (parseInt($('input[name="targetresistance"]').val()) * 0.15 / 60))))
+            level: options.targetlevel,
+            basearmor: options.targetarmor,
+            armor: options.targetarmor,
+            defense: (options.targetlevel || 63) * 5,
+            mitigation: 1 - 15 * (options.targetresistance / 6000),
+            binaryresist: parseInt(10000 - (8300 * (1 - (options.targetresistance * 0.15 / 60))))
         };
         this.base = {
             ap: 0,
@@ -55,7 +80,7 @@ class Player {
         this.auras = {};
         this.spells = {};
         this.items = [];
-        this.addRace();
+        this.addRace(options.racename);
         this.addTalents();
         this.addGear();
         if (!this.mh) return;
@@ -64,25 +89,25 @@ class Player {
         this.addTempEnchants();
         this.addBuffs();
         this.addSpells();
-        if (this.talents.flurry) this.auras.flurry = new Flurry(this);
-        if (this.spells.overpower) this.auras.battlestance = new BattleStance(this);
-        if (this.spells.bloodrage) this.auras.bloodrage = new BloodrageAura(this);
-        if (this.items.includes(9449)) this.auras.pummeler = new Pummeler(this);
-        if (this.items.includes(14554)) this.auras.cloudkeeper = new Cloudkeeper(this);
-        if (this.items.includes(20130)) this.auras.flask = new Flask(this);
-        if (this.items.includes(23041)) this.auras.slayer = new Slayer(this);
-        if (this.items.includes(22954)) this.auras.spider = new Spider(this);
-        if (this.items.includes(23570)) this.auras.gabbar = new Gabbar(this);
-        if (this.items.includes(21180)) this.auras.earthstrike = new Earthstrike(this);
-        if (this.items.includes(21670)) this.auras.swarmguard = new Swarmguard(this);
-        if (this.items.includes(19949)) this.auras.zandalarian = new Zandalarian(this);
+        if (this.talents.flurry) this.auras.flurry = new spellclasses.Flurry(this);
+        if (this.spells.overpower) this.auras.battlestance = new spellclasses.BattleStance(this);
+        if (this.spells.bloodrage) this.auras.bloodrage = new spellclasses.BloodrageAura(this);
+        if (this.items.includes(9449)) this.auras.pummeler = new spellclasses.Pummeler(this);
+        if (this.items.includes(14554)) this.auras.cloudkeeper = new spellclasses.Cloudkeeper(this);
+        if (this.items.includes(20130)) this.auras.flask = new spellclasses.Flask(this);
+        if (this.items.includes(23041)) this.auras.slayer = new spellclasses.Slayer(this);
+        if (this.items.includes(22954)) this.auras.spider = new spellclasses.Spider(this);
+        if (this.items.includes(23570)) this.auras.gabbar = new spellclasses.Gabbar(this);
+        if (this.items.includes(21180)) this.auras.earthstrike = new spellclasses.Earthstrike(this);
+        if (this.items.includes(21670)) this.auras.swarmguard = new spellclasses.Swarmguard(this);
+        if (this.items.includes(19949)) this.auras.zandalarian = new spellclasses.Zandalarian(this);
         this.update();
         if (this.oh)
             this.oh.timer = Math.round(this.oh.speed * 1000 / this.stats.haste / 2);
     }
-    addRace() {
+    addRace(racename) {
         for (let race of races) {
-            if (race.name == $('select[name="race"]').val()) {
+            if (race.name == racename) {
                 this.base.aprace = race.ap;
                 this.base.ap += race.ap;
                 this.base.str += race.str;
@@ -98,7 +123,7 @@ class Player {
         this.talents = {};
         for (let tree in talents) {
             for (let talent of talents[tree].t) {
-                $.extend(this.talents, talent.aura(talent.c));
+                Object.assign(this.talents, talent.aura(talent.c));
             }
         }
     }
@@ -283,8 +308,8 @@ class Player {
     addSpells() {
         for (let spell of spells) {
             if (spell.active) {
-                if (spell.aura) this.auras[spell.classname.toLowerCase()] = eval(`new ${spell.classname}(this)`);
-                else this.spells[spell.classname.toLowerCase()] = eval(`new ${spell.classname}(this)`);
+                if (spell.aura) this.auras[spell.classname.toLowerCase()] = eval(`new spellclasses.${spell.classname}(this)`);
+                else this.spells[spell.classname.toLowerCase()] = eval(`new spellclasses.${spell.classname}(this)`);
             }
         }
     }
@@ -459,14 +484,14 @@ class Player {
         return r > 0.75 ? 0.75 : r;
     }
     addRage(dmg, result, weapon, spell) {
-        if (!spell || spell instanceof HeroicStrike || spell instanceof HeroicStrikeExecute) {
+        if (!spell || spell instanceof spellclasses.HeroicStrike || spell instanceof spellclasses.HeroicStrikeExecute) {
             if (result != RESULT.MISS && result != RESULT.DODGE && this.talents.umbridledwrath && rng10k() < this.talents.umbridledwrath * 100) {
                 this.rage += 1;
                 //if (log) this.log('Unbridled Wrath proc');
             }
         }
         if (spell) {
-            if (spell instanceof Execute) spell.result = result;
+            if (spell instanceof spellclasses.Execute) spell.result = result;
             if (result == RESULT.MISS || result == RESULT.DODGE)
                 this.rage += spell.refund ? spell.cost * 0.8 : 0;
         }
@@ -594,7 +619,7 @@ class Player {
             tmp = 0;
         }
         let crit = this.crit + this.mh.crit;
-        if (spell instanceof Overpower)
+        if (spell instanceof spellclasses.Overpower)
             crit += this.talents.overpowercrit;
         tmp += crit * 100;
         if (roll < tmp && !spell.nocrit) return RESULT.CRIT;
@@ -779,7 +804,7 @@ class Player {
                 procdmg += this.magicproc({ magicdmg: 60, coeff: 1 });
             }
         }
-        if (!spell || spell instanceof HeroicStrike || spell instanceof HeroicStrikeExecute) {
+        if (!spell || spell instanceof spellclasses.HeroicStrike || spell instanceof spellclasses.HeroicStrikeExecute) {
             if (this.auras.flurry && this.auras.flurry.stacks)
                 this.auras.flurry.proc();
             if (this.mh.windfury && this.mh.windfury.stacks)

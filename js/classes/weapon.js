@@ -1,3 +1,7 @@
+import * as spell from './spell.js';
+import { buffs } from '../data/buffs.js';
+import { rng } from './utility.js';
+
 var WEAPONTYPE = {
     MACE: 0,
     SWORD: 1,
@@ -7,7 +11,7 @@ var WEAPONTYPE = {
     POLEARM: 5
 }
 
-class Weapon {
+export class Weapon {
     constructor(player, item, enchant, tempenchant, offhand, twohand) {
         this.player = player;
         this.name = item.name;
@@ -42,7 +46,7 @@ class Weapon {
             if (item.coeff) this.proc1.coeff = parseInt(item.coeff);
             if (item.procextra) this.proc1.extra = item.procextra;
             if (item.procspell) {
-               player.auras[item.procspell.toLowerCase()] = eval('new ' + item.procspell + '(player)');
+               player.auras[item.procspell.toLowerCase()] = eval('new spell.' + item.procspell + '(player)');
                this.proc1.spell = player.auras[item.procspell.toLowerCase()];
             }
         }
@@ -52,12 +56,12 @@ class Weapon {
             this.proc2.chance = ~~(this.speed * enchant.ppm / 0.006);
             if (enchant.magicdmg) this.proc2.magicdmg = enchant.magicdmg;
             if (enchant.procspell && !offhand) {
-                player.auras.crusader1 = new Crusader(player);
+                player.auras.crusader1 = new spell.Crusader(player);
                 player.auras.crusader1.name = 'Crusader (MH)';
                 this.proc2.spell = player.auras.crusader1;
             }
             if (enchant.procspell && offhand) {
-                player.auras.crusader2 = new Crusader(player);
+                player.auras.crusader2 = new spell.Crusader(player);
                 player.auras.crusader2.name = 'Crusader (OH)';
                 this.proc2.spell = player.auras.crusader2;
             }
@@ -65,7 +69,7 @@ class Weapon {
 
         for (let buff of buffs) {
             if (buff.id == 10614 && buff.active && !this.offhand) {
-                this.player.auras.windfury = new Windfury(this.player);
+                this.player.auras.windfury = new spell.Windfury(this.player);
                 this.windfury = this.player.auras.windfury;
             }
         }

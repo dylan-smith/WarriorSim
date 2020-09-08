@@ -1,4 +1,4 @@
-var buffs = [
+export var buffs = [
    {
       id: 2458,
       spellid: true,

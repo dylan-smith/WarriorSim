@@ -1,6 +1,12 @@
-var SIM = SIM || {}
+import { STATS } from './stats.js';
+import { talents } from './data/talents.js';
+import { buffs } from './data/buffs.js';
+import { spells } from './data/spells.js';
+import { gear, enchant, sets } from './data/gear.js';
+import { version, Simulation } from './classes/simulation.js';
+import { Player } from './classes/player.js';
 
-SIM.UI = {
+export var UI = {
 
     init: function () {
         var view = this;
@@ -190,11 +196,20 @@ SIM.UI = {
         let btn = view.sidebar.find('.js-dps');
         dps.text('');
         time.text('');
-        var player = new Player();
+        var options = {
+            aqbooks: $('select[name="aqbooks"]').val() == "Yes", 
+            weaponrng: $('select[name="weaponrng"]').val() == "Yes",
+            spelldamage: parseInt($('input[name="spelldamage"]').val()),
+            targetlevel: parseInt($('input[name="targetlevel"]').val()),
+            targetarmor: parseInt($('input[name="targetarmor"]').val()),
+            targetresistance: parseInt($('input[name="targetresistance"]').val()),
+            racename: $('select[name="race"]').val()
+        }
+        var player = new Player(null, null, null, options);
         if (row) {
             let type = row.parents('table').data('type');
             if (type == "finger" || type == "trinket" || type == "custom")
-                player = new Player(null, type);
+                player = new Player(null, type, null, options);
         }
         if (!player.mh) {
             view.addAlert('No weapon selected');
@@ -211,7 +226,7 @@ SIM.UI = {
                 if (row) view.simulateRow(row);
                 else view.endLoading();
 
-                SIM.STATS.initCharts(sim);
+                STATS.initCharts(sim);
                 sim = null;
                 player = null;
                 
@@ -221,6 +236,13 @@ SIM.UI = {
                 let perc = parseInt(iteration / sim.iterations * 100);
                 dps.text((sim.totaldmg / sim.totalduration).toFixed(2));
                 btn.css('background', 'linear-gradient(to right, transparent ' + perc + '%, #444 ' + perc + '%)');
+            }, 
+            {
+                timesecsmin: parseInt($('input[name="timesecsmin"]').val()),
+                timesecsmax: parseInt($('input[name="timesecsmax"]').val()),
+                executeperc: parseInt($('input[name="executeperc"]').val()),
+                startrage: parseInt($('input[name="startrage"]').val()),
+                simulations: parseInt($('input[name="simulations"]').val())
             }
         );
         sim.start();
@@ -238,7 +260,17 @@ SIM.UI = {
         var rowsdone = tr.siblings(':not(.waiting)').length;
         var btn = view.sidebar.find('.js-table');
 
-        var player = new Player(item, type, istemp ? 2 : isench ? 1 : 0);
+        var options = {
+            aqbooks: $('select[name="aqbooks"]').val() == "Yes", 
+            weaponrng: $('select[name="weaponrng"]').val() == "Yes",
+            spelldamage: parseInt($('input[name="spelldamage"]').val()),
+            targetlevel: parseInt($('input[name="targetlevel"]').val()),
+            targetarmor: parseInt($('input[name="targetarmor"]').val()),
+            targetresistance: parseInt($('input[name="targetresistance"]').val()),
+            racename: $('select[name="race"]').val()
+        }
+
+        var player = new Player(item, type, istemp ? 2 : isench ? 1 : 0, options);
         var sim = new Simulation(player, 
             () => {
                 // Finished
@@ -284,6 +316,13 @@ SIM.UI = {
                 let perc = parseInt((rowsdone * sim.iterations + iteration) / (sim.iterations * rows) * 100);
                 btn.css('background', 'linear-gradient(to right, transparent ' + perc + '%, #444 ' + perc + '%)');
                 dps.text((sim.totaldmg / sim.totalduration).toFixed(2));
+            },
+            {
+                timesecsmin: parseInt($('input[name="timesecsmin"]').val()),
+                timesecsmax: parseInt($('input[name="timesecsmax"]').val()),
+                executeperc: parseInt($('input[name="executeperc"]').val()),
+                startrage: parseInt($('input[name="startrage"]').val()),
+                simulations: parseInt($('input[name="simulations"]').val())
             }
         );
         sim.start();
@@ -415,7 +454,16 @@ SIM.UI = {
 
     updateSidebar: function () {
         var view = this;
-        var player = new Player();
+        var options = {
+            aqbooks: $('select[name="aqbooks"]').val() == "Yes", 
+            weaponrng: $('select[name="weaponrng"]').val() == "Yes",
+            spelldamage: parseInt($('input[name="spelldamage"]').val()),
+            targetlevel: parseInt($('input[name="targetlevel"]').val()),
+            targetarmor: parseInt($('input[name="targetarmor"]').val()),
+            targetresistance: parseInt($('input[name="targetresistance"]').val()),
+            racename: $('select[name="race"]').val()
+        }
+        var player = new Player(null, null, null, options);
 
         let space = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
         if (!player.mh) return;

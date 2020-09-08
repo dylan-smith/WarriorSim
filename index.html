@@ -21,20 +21,7 @@
   <script type="text/javascript" src="node_modules/tablesorter/dist/js/jquery.tablesorter.min.js"></script>
   <script type="text/javascript" src="node_modules/tablesorter/dist/js/jquery.tablesorter.widgets.min.js"></script>
   <script type="text/javascript" src="node_modules/chart.js/dist/Chart.min.js"></script>
-
-  <script type="text/javascript" src="js/classes/player.js"></script>
-  <script type="text/javascript" src="js/classes/simulation.js"></script>
-  <script type="text/javascript" src="js/classes/spell.js"></script>
-  <script type="text/javascript" src="js/classes/weapon.js"></script>
-  <script type="text/javascript" src="js/data/gear.js"></script>
-  <script type="text/javascript" src="js/data/races.js"></script>
-  <script type="text/javascript" src="js/data/buffs.js"></script>
-  <script type="text/javascript" src="js/data/spells.js"></script>
-  <script type="text/javascript" src="js/data/talents.js"></script>
-  <script type="text/javascript" src="js/data/session.js"></script>
-  <script type="text/javascript" src="js/settings.js"></script>
-  <script type="text/javascript" src="js/stats.js"></script>
-  <script type="text/javascript" src="js/ui.js"></script>
+  <script type="module" src="js/init.js"></script>
   <!-- endinject -->
 
   <script>var whTooltips = { colorLinks: true, iconizeLinks: false, renameLinks: false, "hide": { "ilvl": false } };</script>
@@ -338,15 +325,6 @@ profiles
     
     <progress value="0" max="100"></progress>
   </section>
-
-
-  <script>
-    $(document).ready(function () {
-      SIM.UI.init();
-      SIM.SETTINGS.init();
-      SIM.STATS.init();
-    });
-  </script>
 
 </body>
 

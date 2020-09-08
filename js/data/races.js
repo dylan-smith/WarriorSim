@@ -1,4 +1,4 @@
-var races = [
+export var races = [
    {
       name: 'Human',
       str: 120,

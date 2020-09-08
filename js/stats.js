@@ -1,6 +1,4 @@
-var SIM = SIM || {}
-
-SIM.STATS = {
+export var STATS = {
 
     init: function () {
         var view = this;
