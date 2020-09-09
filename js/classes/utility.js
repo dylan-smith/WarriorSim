@@ -19,3 +19,11 @@ export function incrementStep(count) {
 export function resetStep() {
     step = 0;
 }
+
+export var RESULT = {
+    HIT: 0,
+    MISS: 1,
+    DODGE: 2,
+    CRIT: 3,
+    GLANCE: 4
+}

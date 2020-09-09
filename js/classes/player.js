@@ -4,16 +4,8 @@ import { gear, enchant, sets } from '../data/gear.js';
 import { Weapon } from './weapon.js';
 import { buffs } from '../data/buffs.js';
 import { spells, SpellFactory } from '../data/spells.js';
-import { rng, rng10k, avg } from './utility.js';
+import { rng, rng10k, avg, RESULT } from './utility.js';
 import * as spellclasses from './spell.js';
-
-export var RESULT = {
-    HIT: 0,
-    MISS: 1,
-    DODGE: 2,
-    CRIT: 3,
-    GLANCE: 4
-}
 
 export class Player {
     constructor(testItem, testType, enchtype, options) {

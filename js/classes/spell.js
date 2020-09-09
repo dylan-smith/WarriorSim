@@ -1,6 +1,4 @@
-import { step, rng } from './utility.js';
-
-import { RESULT } from './player.js';
+import { step, rng, RESULT } from './utility.js';
 
 export class Spell {
     constructor(player) {
