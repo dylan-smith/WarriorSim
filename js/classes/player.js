@@ -3,7 +3,7 @@ import { talents } from '../data/talents.js';
 import { gear, enchant, sets } from '../data/gear.js';
 import { Weapon } from './weapon.js';
 import { buffs } from '../data/buffs.js';
-import { spells } from '../data/spells.js';
+import { spells, SpellFactory } from '../data/spells.js';
 import { rng, rng10k, avg } from './utility.js';
 import * as spellclasses from './spell.js';
 
@@ -89,18 +89,20 @@ export class Player {
         this.addTempEnchants();
         this.addBuffs();
         this.addSpells();
-        if (this.talents.flurry) this.auras.flurry = new spellclasses.Flurry(this);
-        if (this.spells.overpower) this.auras.battlestance = new spellclasses.BattleStance(this);
-        if (this.spells.bloodrage) this.auras.bloodrage = new spellclasses.BloodrageAura(this);
-        if (this.items.includes(9449)) this.auras.pummeler = new spellclasses.Pummeler(this);
-        if (this.items.includes(14554)) this.auras.cloudkeeper = new spellclasses.Cloudkeeper(this);
-        if (this.items.includes(20130)) this.auras.flask = new spellclasses.Flask(this);
-        if (this.items.includes(23041)) this.auras.slayer = new spellclasses.Slayer(this);
-        if (this.items.includes(22954)) this.auras.spider = new spellclasses.Spider(this);
-        if (this.items.includes(23570)) this.auras.gabbar = new spellclasses.Gabbar(this);
-        if (this.items.includes(21180)) this.auras.earthstrike = new spellclasses.Earthstrike(this);
-        if (this.items.includes(21670)) this.auras.swarmguard = new spellclasses.Swarmguard(this);
-        if (this.items.includes(19949)) this.auras.zandalarian = new spellclasses.Zandalarian(this);
+
+        if (this.talents.flurry) this.auras.flurry = SpellFactory(this, spellclasses.Flurry);
+        if (this.spells.overpower) this.auras.battlestance = SpellFactory(this, spellclasses.BattleStance);
+        if (this.spells.bloodrage) this.auras.bloodrage = SpellFactory(this, spellclasses.BloodrageAura);
+        if (this.items.includes(9449)) this.auras.pummeler = SpellFactory(this, spellclasses.Pummeler);
+        if (this.items.includes(14554)) this.auras.cloudkeeper = SpellFactory(this, spellclasses.Cloudkeeper);
+        if (this.items.includes(20130)) this.auras.flask = SpellFactory(this, spellclasses.Flask);
+        if (this.items.includes(23041)) this.auras.slayer = SpellFactory(this, spellclasses.Slayer);
+        if (this.items.includes(22954)) this.auras.spider = SpellFactory(this, spellclasses.Spider);
+        if (this.items.includes(23570)) this.auras.gabbar = SpellFactory(this, spellclasses.Gabbar);
+        if (this.items.includes(21180)) this.auras.earthstrike = SpellFactory(this, spellclasses.Earthstrike);
+        if (this.items.includes(21670)) this.auras.swarmguard = SpellFactory(this, spellclasses.Swarmguard);
+        if (this.items.includes(19949)) this.auras.zandalarian = SpellFactory(this, spellclasses.Zandalarian);
+
         this.update();
         if (this.oh)
             this.oh.timer = Math.round(this.oh.speed * 1000 / this.stats.haste / 2);
@@ -162,8 +164,8 @@ export class Player {
                         proc.extra = item.procextra;
                         proc.magicdmg = item.magicdmg;
                         if (item.procspell) {
-                            this.auras[item.procspell.toLowerCase()] = eval('new ' + item.procspell + '(this)');
-                            proc.spell = this.auras[item.procspell.toLowerCase()];
+                            this.auras[item.procspell.name.toLowerCase()] = SpellFactory(this, item.procspell);
+                            proc.spell = this.auras[item.procspell.name.toLowerCase()];
                         }
                         this["trinketproc" + (this.trinketproc1 ? 2 : 1)] = proc;
                     }
@@ -265,8 +267,8 @@ export class Player {
                     if (bonus.stats.procspell) {
                         this.attackproc = {};
                         this.attackproc.chance = bonus.stats.procchance * 100;
-                        this.auras[bonus.stats.procspell.toLowerCase()] = eval('new ' + bonus.stats.procspell + '(this)');
-                        this.attackproc.spell = this.auras[bonus.stats.procspell.toLowerCase()];
+                        this.auras[bonus.stats.procspell.name.toLowerCase()] = SpellFactory(this, bonus.stats.procspell);
+                        this.attackproc.spell = this.auras[bonus.stats.procspell.name.toLowerCase()];
                     }
                     if (bonus.stats.enhancedbs) {
                         this.enhancedbs = true;
@@ -308,8 +310,8 @@ export class Player {
     addSpells() {
         for (let spell of spells) {
             if (spell.active) {
-                if (spell.aura) this.auras[spell.classname.toLowerCase()] = eval(`new spellclasses.${spell.classname}(this)`);
-                else this.spells[spell.classname.toLowerCase()] = eval(`new spellclasses.${spell.classname}(this)`);
+                if (spell.aura) this.auras[spell.classname.name.toLowerCase()] = SpellFactory(this, spell.classname);
+                else this.spells[spell.classname.name.toLowerCase()] = SpellFactory(this, spell.classname);
             }
         }
     }

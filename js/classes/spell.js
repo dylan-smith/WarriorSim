@@ -1,5 +1,5 @@
 import { step, rng } from './utility.js';
-import { spells } from '../data/spells.js';
+
 import { RESULT } from './player.js';
 
 export class Spell {
@@ -41,12 +41,12 @@ export class Spell {
 }
 
 export class Bloodthirst extends Spell {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.cost = 30;
         this.cooldown = 6;
-        this.threshold = parseInt(spells[0].minrage);
-        this.maxdelay = parseInt(spells[0].reaction);
+        this.threshold = parseInt(data.minrage);
+        this.maxdelay = parseInt(data.reaction);
         this.weaponspell = false;
     }
     dmg() {
@@ -58,14 +58,14 @@ export class Bloodthirst extends Spell {
 }
 
 export class Whirlwind extends Spell {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.cost = 25;
         this.cooldown = 10;
         this.refund = false;
-        this.threshold = parseInt(spells[5].minrage);
-        this.maincd = parseInt(spells[5].maincd) * 1000;
-        this.maxdelay = parseInt(spells[5].reaction);
+        this.threshold = parseInt(data.minrage);
+        this.maincd = parseInt(data.maincd) * 1000;
+        this.maxdelay = parseInt(data.reaction);
     }
     dmg() {
         let dmg;
@@ -81,14 +81,14 @@ export class Whirlwind extends Spell {
 }
 
 export class Overpower extends Spell {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.cost = 5;
         this.cooldown = 5;
         this.canDodge = false;
-        this.threshold = parseInt(spells[9].maxrage);
-        this.maincd = parseInt(spells[9].maincd);
-        this.maxdelay = parseInt(spells[9].reaction);
+        this.threshold = parseInt(data.maxrage);
+        this.maincd = parseInt(data.maincd);
+        this.maxdelay = parseInt(data.reaction);
     }
     dmg() {
         let dmg;
@@ -113,11 +113,11 @@ export class Overpower extends Spell {
 }
 
 export class Execute extends Spell {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.cost = 15 - player.talents.executecost;
         this.usedrage = 0;
-        this.maxdelay = parseInt(spells[4].reaction);
+        this.maxdelay = parseInt(data.reaction);
         this.refund = false;
         this.weaponspell = false;
     }
@@ -148,14 +148,14 @@ export class Execute extends Spell {
 }
 
 export class Bloodrage extends Spell {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.cost = 0;
         this.rage = 10 + player.talents.bloodragebonus;
         this.threshold = 80;
         this.cooldown = 60;
         this.useonly = true;
-        this.maxdelay = parseInt(spells[12].reaction);
+        this.maxdelay = parseInt(data.reaction);
     }
     use() {
         this.timer = this.cooldown * 1000;
@@ -168,16 +168,16 @@ export class Bloodrage extends Spell {
 }
 
 export class HeroicStrike extends Spell {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.cost = 15 - player.talents.impheroicstrike;
-        this.threshold = parseInt(spells[2].minrage);
-        this.maincd = parseInt(spells[2].maincd) * 1000;
-        this.unqueue = parseInt(spells[2].unqueue);
-        this.unqueuetimer = parseInt(spells[2].unqueuetimer);
+        this.threshold = parseInt(data.minrage);
+        this.maincd = parseInt(data.maincd) * 1000;
+        this.unqueue = parseInt(data.unqueue);
+        this.unqueuetimer = parseInt(data.unqueuetimer);
         this.name = 'Heroic Strike';
         this.bonus = player.aqbooks ? 157 : 138;
-        this.maxdelay = parseInt(spells[2].reaction);
+        this.maxdelay = parseInt(data.reaction);
         this.useonly = true;
     }
     use() {
@@ -192,15 +192,15 @@ export class HeroicStrike extends Spell {
 }
 
 export class HeroicStrikeExecute extends Spell {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.cost = 15 - player.talents.impheroicstrike;
-        this.threshold = parseInt(spells[19].minrage);
-        this.unqueue = parseInt(spells[19].unqueue);
-        this.unqueuetimer = parseInt(spells[19].unqueuetimer);
+        this.threshold = parseInt(data.minrage);
+        this.unqueue = parseInt(data.unqueue);
+        this.unqueuetimer = parseInt(data.unqueuetimer);
         this.name = 'Heroic Strike (Execute Phase)';
         this.bonus = player.aqbooks ? 157 : 138;
-        this.maxdelay = parseInt(spells[19].reaction);
+        this.maxdelay = parseInt(data.reaction);
         this.useonly = true;
     }
     use() {
@@ -213,13 +213,13 @@ export class HeroicStrikeExecute extends Spell {
 }
 
 export class MortalStrike extends Spell {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.cost = 30;
         this.cooldown = 6;
         this.name = 'Mortal Strike';
-        this.threshold = parseInt(spells[1].minrage);
-        this.maxdelay = parseInt(spells[1].reaction);
+        this.threshold = parseInt(data.minrage);
+        this.maxdelay = parseInt(data.reaction);
     }
     dmg() {
         let dmg;
@@ -233,11 +233,11 @@ export class MortalStrike extends Spell {
 }
 
 export class SunderArmor extends Spell {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.cost = 15 - player.talents.impsunderarmor;
-        this.globals = parseInt(spells[16].globals);
-        this.maxdelay = parseInt(spells[16].reaction);
+        this.globals = parseInt(data.globals);
+        this.maxdelay = parseInt(data.reaction);
         this.stacks = 0;
         this.nocrit = true;
         this.name = 'Sunder Armor';
@@ -253,11 +253,11 @@ export class SunderArmor extends Spell {
 }
 
 export class Hamstring extends Spell {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.cost = 10;
-        this.threshold = parseInt(spells[18].minrage);
-        this.maxdelay = parseInt(spells[18].reaction);
+        this.threshold = parseInt(data.minrage);
+        this.maxdelay = parseInt(data.reaction);
         if (player.items.includes(19577)) this.cost -= 2;
     }
     dmg() {
@@ -307,12 +307,12 @@ export class Aura {
 }
 
 export class Recklessness extends Aura {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.duration = 15;
         this.stats = { crit: 100 };
-        this.maxdelay = parseInt(spells[7].reaction);
-        this.timetoend = parseInt(spells[7].timetoend) * 1000;
+        this.maxdelay = parseInt(data.reaction);
+        this.timetoend = parseInt(data.timetoend) * 1000;
     }
     use() {
         if (this.timer) this.uptime += (step - this.starttimer);
@@ -444,14 +444,14 @@ export class Felstriker extends Aura {
 }
 
 export class DeathWish extends Aura {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.duration = 30;
         this.mult_stats = { dmgmod: 20 };
         this.name = 'Death Wish';
-        this.crusaders = parseInt(spells[6].crusaders);
-        this.timetoend = parseInt(spells[6].timetoend) * 1000;
-        this.maxdelay = parseInt(spells[6].reaction);
+        this.crusaders = parseInt(data.crusaders);
+        this.timetoend = parseInt(data.timetoend) * 1000;
+        this.maxdelay = parseInt(data.reaction);
     }
     use() {
         if (this.timer) this.uptime += (step - this.starttimer);
@@ -498,13 +498,13 @@ export class BattleStance extends Aura {
 }
 
 export class MightyRagePotion extends Aura {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.stats = { str: 60 };
         this.duration = 20;
-        this.crusaders = parseInt(spells[13].crusaders);
-        this.timetoend = parseInt(spells[13].timetoend) * 1000;
-        this.maxdelay = parseInt(spells[13].reaction);
+        this.crusaders = parseInt(data.crusaders);
+        this.timetoend = parseInt(data.timetoend) * 1000;
+        this.maxdelay = parseInt(data.reaction);
         this.name = 'Mighty Rage Potion';
     }
     use() {
@@ -532,13 +532,13 @@ export class MightyRagePotion extends Aura {
 }
 
 export class BloodFury extends Aura {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.duration = 15;
         this.mult_stats = { apmod: 25 };
         this.name = 'Blood Fury';
-        this.maxdelay = parseInt(spells[11].reaction);
-        this.timetoend = parseInt(spells[11].timetoend) * 1000;
+        this.maxdelay = parseInt(data.reaction);
+        this.timetoend = parseInt(data.timetoend) * 1000;
     }
     use() {
         if (this.timer) this.uptime += (step - this.starttimer);
@@ -563,12 +563,12 @@ export class BloodFury extends Aura {
 }
 
 export class Berserking extends Aura {
-    constructor(player) {
+    constructor(player, data) {
         super(player);
         this.duration = 10;
-        this.mult_stats = { haste: parseInt(spells[10].haste) };
-        this.maxdelay = parseInt(spells[10].reaction);
-        this.timetoend = parseInt(spells[10].timetoend) * 1000;
+        this.mult_stats = { haste: parseInt(data.haste) };
+        this.maxdelay = parseInt(data.reaction);
+        this.timetoend = parseInt(data.timetoend) * 1000;
     }
     use() {
         if (this.timer) this.uptime += (step - this.starttimer);

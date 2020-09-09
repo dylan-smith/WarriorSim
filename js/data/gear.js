@@ -1,3 +1,5 @@
+import * as spells from '../classes/spell.js';
+
 export var gear = {
    "head": [
       {
@@ -3113,7 +3115,7 @@ export var gear = {
          "ppm": 1,
          "phase": 1,
          "id": 13246,
-         "procspell": "Avenger"
+         "procspell": spells.Avenger
       },
       {
          "name": "Ancient Hakkari Manslayer",
@@ -3139,7 +3141,7 @@ export var gear = {
          "ppm": 1,
          "phase": 1,
          "id": 12798,
-         "procspell": "Annihilator"
+         "procspell": spells.Annihilator
       },
       {
          "name": "Axe of the Deep Woods",
@@ -3483,7 +3485,7 @@ export var gear = {
          "ppm": 1,
          "phase": 1,
          "id": 12590,
-         "procspell": "Felstriker"
+         "procspell": spells.Felstriker
       },
       {
          "name": "Finkle's Skinner",
@@ -3698,7 +3700,7 @@ export var gear = {
          "ppm": 1,
          "phase": 1,
          "id": 18203,
-         "procspell": "Eskhandar",
+         "procspell": spells.Eskhandar,
       },
       {
          "name": "R14 Claw (MH)",
@@ -3816,7 +3818,7 @@ export var gear = {
          "ppm": 1,
          "phase": 2,
          "id": 17112,
-         "procspell": "Empyrean",
+         "procspell": spells.Empyrean,
       },
       {
          "id": 11684,
@@ -4252,7 +4254,7 @@ export var gear = {
          "ppm": 1.8,
          "phase": 1,
          "id": 6622,
-         "procspell": "Zeal"
+         "procspell": spells.Zeal
       },
       {
          "name": "Zulian Slicer",
@@ -4407,7 +4409,7 @@ export var gear = {
          "ppm": 1,
          "phase": 1,
          "id": 13246,
-         "procspell": "Avenger"
+         "procspell": spells.Avenger
       },
       {
          "name": "Ancient Hakkari Manslayer",
@@ -4740,7 +4742,7 @@ export var gear = {
          "ppm": 1,
          "phase": 1,
          "id": 12590,
-         "procspell": "Felstriker"
+         "procspell": spells.Felstriker
       },
       {
          "name": "Glacial Blade",
@@ -6057,7 +6059,7 @@ export var gear = {
          "phase": 1,
          "type": "Sword",
          "ppm": 2,
-         "procspell": "Bonereaver"
+         "procspell": spells.Bonereaver
       },
       {
          "name": "Claymore of Unholy Might",
@@ -6107,7 +6109,7 @@ export var gear = {
          "phase": 1,
          "type": "Sword",
          "ppm": 1,
-         "procspell": "Destiny"
+         "procspell": spells.Destiny
       },
       {
          "name": "R14 Greatsword",
@@ -6196,7 +6198,7 @@ export var gear = {
          "phase": 3,
          "type": "Sword",
          "ppm": 1,
-         "procspell": "Untamed"
+         "procspell": spells.Untamed
       },
       {
          "name": "Typhoon",
@@ -6538,7 +6540,7 @@ export var enchant = {
          "name": "Crusader",
          "phase": 1,
          "ppm": 1,
-         "procspell": "Crusader"
+         "procspell": spells.Crusader
       },
       {
          "id": 13898,
@@ -6606,7 +6608,7 @@ export var enchant = {
          "name": "Crusader",
          "phase": 1,
          "ppm": 1,
-         "procspell": "Crusader"
+         "procspell": spells.Crusader
       },
       {
          "id": 13898,
@@ -6674,7 +6676,7 @@ export var enchant = {
          "name": "Crusader",
          "phase": 1,
          "ppm": 1,
-         "procspell": "Crusader"
+         "procspell": spells.Crusader
       },
       {
          "id": 13898,
@@ -6819,7 +6821,7 @@ export var sets = [
       name: 'Primal Blessing',
       items: [19896, 19910],
       bonus: [
-         { count: 2, stats: { procspell: "PrimalBlessing", procchance: 1 } }
+         { count: 2, stats: { procspell: spells.PrimalBlessing, procchance: 1 } }
       ]
    },
    {
