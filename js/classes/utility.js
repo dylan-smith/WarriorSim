@@ -11,6 +11,15 @@ export function avg(min, max) {
 }
 
 export var step = 0;
+export var log = false;
+
+export function enableLogging() {
+    log = true;
+}
+
+export function disableLogging() {
+    log = false;
+}
 
 export function incrementStep(count) {
     step += count;

@@ -73,8 +73,8 @@ export class Whirlwind extends Spell {
     }
     canUse() {
         return !this.timer && !this.player.timer && this.cost <= this.player.rage && (this.player.rage >= this.threshold ||
-            (this.player.spells.bloodthirst && this.player.spells.bloodthirst.timer >= this.maincd) ||
-            (this.player.spells.mortalstrike && this.player.spells.mortalstrike.timer >= this.maincd));
+            (this.player.spells[Bloodthirst] && this.player.spells[Bloodthirst].timer >= this.maincd) ||
+            (this.player.spells[MortalStrike] && this.player.spells[MortalStrike].timer >= this.maincd));
     }
 }
 
@@ -101,12 +101,12 @@ export class Overpower extends Spell {
         this.player.rage -= this.cost;
         this.timer = this.cooldown * 1000;
         if (this.player.zerkstance)
-            this.player.auras.battlestance.use();
+            this.player.auras[BattleStance].use();
     }
     canUse() {
         return !this.timer && !this.player.timer && this.cost <= this.player.rage && this.player.dodgetimer && this.player.rage <= this.threshold &&
-            ((this.player.spells.bloodthirst && this.player.spells.bloodthirst.timer >= this.maincd) ||
-            (this.player.spells.mortalstrike && this.player.spells.mortalstrike.timer >= this.maincd));
+            ((this.player.spells[Bloodthirst] && this.player.spells[Bloodthirst].timer >= this.maincd) ||
+            (this.player.spells[MortalStrike] && this.player.spells[MortalStrike].timer >= this.maincd));
     }
 }
 
@@ -158,7 +158,7 @@ export class Bloodrage extends Spell {
     use() {
         this.timer = this.cooldown * 1000;
         this.player.rage = Math.min(this.player.rage + this.rage, 100);
-        this.player.auras.bloodrage.use();
+        this.player.auras[Bloodrage].use();
     }
     canUse() {
         return this.timer == 0 && this.player.rage < this.threshold;
@@ -183,8 +183,8 @@ export class HeroicStrike extends Spell {
     }
     canUse() {
         return !this.player.nextswinghs && this.cost <= this.player.rage && (this.player.rage >= this.threshold ||
-            (this.player.spells.bloodthirst && this.player.spells.bloodthirst.timer >= this.maincd) ||
-            (this.player.spells.mortalstrike && this.player.spells.mortalstrike.timer >= this.maincd))
+            (this.player.spells[Bloodthirst] && this.player.spells[Bloodthirst].timer >= this.maincd) ||
+            (this.player.spells[MortalStrike] && this.player.spells[MortalStrike].timer >= this.maincd))
             && (!this.unqueue || (this.player.mh.timer > this.unqueuetimer));
     }
 }
