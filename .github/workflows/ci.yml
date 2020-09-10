@@ -24,6 +24,8 @@ jobs:
 
     - run: npm run test
 
+    - run: npm run test-prod
+
     # dist is in gitignore, so need to copy it to another dir before publish
     - run: mkdir public
     - run: cp -r dist/. public
