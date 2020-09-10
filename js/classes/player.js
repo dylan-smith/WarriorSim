@@ -4,13 +4,13 @@ import { gear, enchant, sets } from '../data/gear.js';
 import { Weapon } from './weapon.js';
 import { buffs } from '../data/buffs.js';
 import { spells, SpellFactory } from '../data/spells.js';
-import { rng, rng10k, avg, RESULT } from './utility.js';
+import { rng, rng10k, avg, RESULT, step } from './utility.js';
 import * as spellclasses from './spell.js';
 
 export class Player {
     constructor(testItem, testType, enchtype, options) {
         options = options || {};
-        options.aqbooks = options.aqbooks || false;
+        options.aqbooks = options.aqbooks || true;
         options.weaponrng = options.weaponrng || true;
         options.targetlevel = options.targetlevel || 63;
         options.targetarmor = options.targetarmor || 336;
@@ -82,18 +82,18 @@ export class Player {
         this.addBuffs();
         this.addSpells();
 
-        if (this.talents.flurry) this.auras.flurry = SpellFactory(this, spellclasses.Flurry);
-        if (this.spells.overpower) this.auras.battlestance = SpellFactory(this, spellclasses.BattleStance);
-        if (this.spells.bloodrage) this.auras.bloodrage = SpellFactory(this, spellclasses.BloodrageAura);
-        if (this.items.includes(9449)) this.auras.pummeler = SpellFactory(this, spellclasses.Pummeler);
-        if (this.items.includes(14554)) this.auras.cloudkeeper = SpellFactory(this, spellclasses.Cloudkeeper);
-        if (this.items.includes(20130)) this.auras.flask = SpellFactory(this, spellclasses.Flask);
-        if (this.items.includes(23041)) this.auras.slayer = SpellFactory(this, spellclasses.Slayer);
-        if (this.items.includes(22954)) this.auras.spider = SpellFactory(this, spellclasses.Spider);
-        if (this.items.includes(23570)) this.auras.gabbar = SpellFactory(this, spellclasses.Gabbar);
-        if (this.items.includes(21180)) this.auras.earthstrike = SpellFactory(this, spellclasses.Earthstrike);
-        if (this.items.includes(21670)) this.auras.swarmguard = SpellFactory(this, spellclasses.Swarmguard);
-        if (this.items.includes(19949)) this.auras.zandalarian = SpellFactory(this, spellclasses.Zandalarian);
+        if (this.talents.flurry) this.auras[spellclasses.Flurry] = SpellFactory(this, spellclasses.Flurry);
+        if (this.spells[spellclasses.Overpower]) this.auras[spellclasses.BattleStance] = SpellFactory(this, spellclasses.BattleStance);
+        if (this.spells[spellclasses.Bloodrage]) this.auras[spellclasses.Bloodrage] = SpellFactory(this, spellclasses.BloodrageAura);
+        if (this.items.includes(9449)) this.auras[spellclasses.Pummeler] = SpellFactory(this, spellclasses.Pummeler);
+        if (this.items.includes(14554)) this.auras[spellclasses.Cloudkeeper] = SpellFactory(this, spellclasses.Cloudkeeper);
+        if (this.items.includes(20130)) this.auras[spellclasses.Flask] = SpellFactory(this, spellclasses.Flask);
+        if (this.items.includes(23041)) this.auras[spellclasses.Slayer] = SpellFactory(this, spellclasses.Slayer);
+        if (this.items.includes(22954)) this.auras[spellclasses.Spider] = SpellFactory(this, spellclasses.Spider);
+        if (this.items.includes(23570)) this.auras[spellclasses.Gabbar] = SpellFactory(this, spellclasses.Gabbar);
+        if (this.items.includes(21180)) this.auras[spellclasses.Earthstrike] = SpellFactory(this, spellclasses.Earthstrike);
+        if (this.items.includes(21670)) this.auras[spellclasses.Swarmguard] = SpellFactory(this, spellclasses.Swarmguard);
+        if (this.items.includes(19949)) this.auras[spellclasses.Zandalarian] = SpellFactory(this, spellclasses.Zandalarian);
 
         this.update();
         if (this.oh)
@@ -156,8 +156,8 @@ export class Player {
                         proc.extra = item.procextra;
                         proc.magicdmg = item.magicdmg;
                         if (item.procspell) {
-                            this.auras[item.procspell.name.toLowerCase()] = SpellFactory(this, item.procspell);
-                            proc.spell = this.auras[item.procspell.name.toLowerCase()];
+                            this.auras[item.procspell] = SpellFactory(this, item.procspell);
+                            proc.spell = this.auras[item.procspell];
                         }
                         this["trinketproc" + (this.trinketproc1 ? 2 : 1)] = proc;
                     }
@@ -260,7 +260,7 @@ export class Player {
                         this.attackproc = {};
                         this.attackproc.chance = bonus.stats.procchance * 100;
                         this.auras[bonus.stats.procspell.name.toLowerCase()] = SpellFactory(this, bonus.stats.procspell);
-                        this.attackproc.spell = this.auras[bonus.stats.procspell.name.toLowerCase()];
+                        this.attackproc.spell = this.auras[bonus.stats.procspell];
                     }
                     if (bonus.stats.enhancedbs) {
                         this.enhancedbs = true;
@@ -302,8 +302,8 @@ export class Player {
     addSpells() {
         for (let spell of spells) {
             if (spell.active) {
-                if (spell.aura) this.auras[spell.classname.name.toLowerCase()] = SpellFactory(this, spell.classname);
-                else this.spells[spell.classname.name.toLowerCase()] = SpellFactory(this, spell.classname);
+                if (spell.aura) this.auras[spell.classname] = SpellFactory(this, spell.classname);
+                else this.spells[spell.classname] = SpellFactory(this, spell.classname);
             }
         }
     }
@@ -401,38 +401,38 @@ export class Player {
     }
     updateHaste() {
         this.stats.haste = this.base.haste;
-        if (this.auras.flurry && this.auras.flurry.timer)
-            this.stats.haste *= (1 + this.auras.flurry.mult_stats.haste / 100);
-        if (this.auras.berserking && this.auras.berserking.timer)
-            this.stats.haste *= (1 + this.auras.berserking.mult_stats.haste / 100);
-        if (this.auras.empyrean && this.auras.empyrean.timer)
-            this.stats.haste *= (1 + this.auras.empyrean.mult_stats.haste / 100);
-        if (this.auras.eskhandar && this.auras.eskhandar.timer)
-            this.stats.haste *= (1 + this.auras.eskhandar.mult_stats.haste / 100);
-        if (this.auras.pummeler && this.auras.pummeler.timer)
-            this.stats.haste *= (1 + this.auras.pummeler.mult_stats.haste / 100);
-        if (this.auras.spider && this.auras.spider.timer)
-            this.stats.haste *= (1 + this.auras.spider.mult_stats.haste / 100);
+        if (this.auras[spellclasses.Flurry] && this.auras[spellclasses.Flurry].timer)
+            this.stats.haste *= (1 + this.auras[spellclasses.Flurry].mult_stats.haste / 100);
+        if (this.auras[spellclasses.Berserking] && this.auras[spellclasses.Berserking].timer)
+            this.stats.haste *= (1 + this.auras[spellclasses.Berserking].mult_stats.haste / 100);
+        if (this.auras[spellclasses.Empyrean] && this.auras[spellclasses.Empyrean].timer)
+            this.stats.haste *= (1 + this.auras[spellclasses.Empyrean].mult_stats.haste / 100);
+        if (this.auras[spellclasses.Eskhandar] && this.auras[spellclasses.Eskhandar].timer)
+            this.stats.haste *= (1 + this.auras[spellclasses.Eskhandar].mult_stats.haste / 100);
+        if (this.auras[spellclasses.Pummeler] && this.auras[spellclasses.Pummeler].timer)
+            this.stats.haste *= (1 + this.auras[spellclasses.Pummeler].mult_stats.haste / 100);
+        if (this.auras[spellclasses.Spider] && this.auras[spellclasses.Spider].timer)
+            this.stats.haste *= (1 + this.auras[spellclasses.Spider].mult_stats.haste / 100);
         if (this.stats.haste > 2) this.stats.haste = 2;
     }
     updateBonusDmg() {
         let bonus = 0;
-        if (this.auras.zeal && this.auras.zeal.timer)
-            bonus += this.auras.zeal.stats.bonusdmg;
-        if (this.auras.zandalarian && this.auras.zandalarian.timer)
-            bonus += this.auras.zandalarian.stats.bonusdmg;
+        if (this.auras[spellclasses.Zeal] && this.auras[spellclasses.Zeal].timer)
+            bonus += this.auras[spellclasses.Zeal].stats.bonusdmg;
+        if (this.auras[spellclasses.Zandalarian] && this.auras[spellclasses.Zandalarian].timer)
+            bonus += this.auras[spellclasses.Zandalarian].stats.bonusdmg;
         this.mh.bonusdmg = this.mh.basebonusdmg + bonus;
         if (this.oh)
             this.oh.bonusdmg = this.oh.basebonusdmg + bonus;
     }
     updateArmorReduction() {
         this.target.armor = this.target.basearmor;
-        if (this.auras.annihilator && this.auras.annihilator.timer)
-            this.target.armor = Math.max(this.target.armor - (this.auras.annihilator.stacks * this.auras.annihilator.armor), 0);
-        if (this.auras.bonereaver && this.auras.bonereaver.timer)
-            this.target.armor = Math.max(this.target.armor - (this.auras.bonereaver.stacks * this.auras.bonereaver.armor), 0);
-        if (this.auras.swarmguard && this.auras.swarmguard.timer)
-            this.target.armor = Math.max(this.target.armor - (this.auras.swarmguard.stacks * this.auras.swarmguard.armor), 0);
+        if (this.auras[spellclasses.Annihilator] && this.auras[spellclasses.Annihilator].timer)
+            this.target.armor = Math.max(this.target.armor - (this.auras[spellclasses.Annihilator].stacks * this.auras[spellclasses.Annihilator].armor), 0);
+        if (this.auras[spellclasses.Bonereaver] && this.auras[spellclasses.Bonereaver].timer)
+            this.target.armor = Math.max(this.target.armor - (this.auras[spellclasses.Bonereaver].stacks * this.auras[spellclasses.Bonereaver].armor), 0);
+        if (this.auras[spellclasses.Swarmguard] && this.auras[spellclasses.Swarmguard].timer)
+            this.target.armor = Math.max(this.target.armor - (this.auras[spellclasses.Swarmguard].stacks * this.auras[spellclasses.Swarmguard].armor), 0);
         this.armorReduction = this.getArmorReduction();
     }
     updateDmgMod() {
@@ -534,20 +534,20 @@ export class Player {
         if (this.oh && this.oh.proc1 && this.oh.proc1.spell && this.oh.proc1.spell.timer) this.oh.proc1.spell.step();
         if (this.oh && this.oh.proc2 && this.oh.proc2.spell && this.oh.proc2.spell.timer) this.oh.proc2.spell.step();
 
-        if (this.auras.mightyragepotion && this.auras.mightyragepotion.firstuse && this.auras.mightyragepotion.timer) this.auras.mightyragepotion.step();
-        if (this.auras.recklessness && this.auras.recklessness.firstuse && this.auras.recklessness.timer) this.auras.recklessness.step();
-        if (this.auras.deathwish && this.auras.deathwish.firstuse && this.auras.deathwish.timer) this.auras.deathwish.step();
-        if (this.auras.cloudkeeper && this.auras.cloudkeeper.firstuse && this.auras.cloudkeeper.timer) this.auras.cloudkeeper.step();
-        if (this.auras.flask && this.auras.flask.firstuse && this.auras.flask.timer) this.auras.flask.step();
-        if (this.auras.battlestance && this.auras.battlestance.timer) this.auras.battlestance.step();
-        if (this.auras.bloodfury && this.auras.bloodfury.firstuse && this.auras.bloodfury.timer) this.auras.bloodfury.step();
-        if (this.auras.berserking && this.auras.berserking.firstuse && this.auras.berserking.timer) this.auras.berserking.step();
-        if (this.auras.slayer && this.auras.slayer.firstuse && this.auras.slayer.timer) this.auras.slayer.step();
-        if (this.auras.spider && this.auras.spider.firstuse && this.auras.spider.timer) this.auras.spider.step();
-        if (this.auras.earthstrike && this.auras.earthstrike.firstuse && this.auras.earthstrike.timer) this.auras.earthstrike.step();
-        if (this.auras.pummeler && this.auras.pummeler.firstuse && this.auras.pummeler.timer) this.auras.pummeler.step();
-        if (this.auras.swarmguard && this.auras.swarmguard.firstuse && this.auras.swarmguard.timer) this.auras.swarmguard.step();
-        if (this.auras.zandalarian && this.auras.zandalarian.firstuse && this.auras.zandalarian.timer) this.auras.zandalarian.step();
+        if (this.auras[spellclasses.MightyRagePotion] && this.auras[spellclasses.MightyRagePotion].firstuse && this.auras[spellclasses.MightyRagePotion].timer) this.auras[spellclasses.MightyRagePotion].step();
+        if (this.auras[spellclasses.Recklessness] && this.auras[spellclasses.Recklessness].firstuse && this.auras[spellclasses.Recklessness].timer) this.auras[spellclasses.Recklessness].step();
+        if (this.auras[spellclasses.DeathWish] && this.auras[spellclasses.DeathWish].firstuse && this.auras[spellclasses.DeathWish].timer) this.auras[spellclasses.DeathWish].step();
+        if (this.auras[spellclasses.Cloudkeeper] && this.auras[spellclasses.Cloudkeeper].firstuse && this.auras[spellclasses.Cloudkeeper].timer) this.auras[spellclasses.Cloudkeeper].step();
+        if (this.auras[spellclasses.Flask] && this.auras[spellclasses.Flask].firstuse && this.auras[spellclasses.Flask].timer) this.auras[spellclasses.Flask].step();
+        if (this.auras[spellclasses.BattleStance] && this.auras[spellclasses.BattleStance].timer) this.auras[spellclasses.BattleStance].step();
+        if (this.auras[spellclasses.BloodFury] && this.auras[spellclasses.BloodFury].firstuse && this.auras[spellclasses.BloodFury].timer) this.auras[spellclasses.BloodFury].step();
+        if (this.auras[spellclasses.Berserking] && this.auras[spellclasses.Berserking].firstuse && this.auras[spellclasses.Berserking].timer) this.auras[spellclasses.Berserking].step();
+        if (this.auras[spellclasses.Slayer] && this.auras[spellclasses.Slayer].firstuse && this.auras[spellclasses.Slayer].timer) this.auras[spellclasses.Slayer].step();
+        if (this.auras[spellclasses.Spider] && this.auras[spellclasses.Spider].firstuse && this.auras[spellclasses.Spider].timer) this.auras[spellclasses.Spider].step();
+        if (this.auras[spellclasses.Earthstrike] && this.auras[spellclasses.Earthstrike].firstuse && this.auras[spellclasses.Earthstrike].timer) this.auras[spellclasses.Earthstrike].step();
+        if (this.auras[spellclasses.Pummeler] && this.auras[spellclasses.Pummeler].firstuse && this.auras[spellclasses.Pummeler].timer) this.auras[spellclasses.Pummeler].step();
+        if (this.auras[spellclasses.Swarmguard] && this.auras[spellclasses.Swarmguard].firstuse && this.auras[spellclasses.Swarmguard].timer) this.auras[spellclasses.Swarmguard].step();
+        if (this.auras[spellclasses.Zandalarian] && this.auras[spellclasses.Zandalarian].firstuse && this.auras[spellclasses.Zandalarian].timer) this.auras[spellclasses.Zandalarian].step();
 
         if (this.mh.windfury && this.mh.windfury.timer) this.mh.windfury.step();
         if (this.trinketproc1 && this.trinketproc1.spell && this.trinketproc1.spell.timer) this.trinketproc1.spell.step();
@@ -562,28 +562,28 @@ export class Player {
         if (this.oh && this.oh.proc1 && this.oh.proc1.spell && this.oh.proc1.spell.timer) this.oh.proc1.spell.end();
         if (this.oh && this.oh.proc2 && this.oh.proc2.spell && this.oh.proc2.spell.timer) this.oh.proc2.spell.end();
 
-        if (this.auras.mightyragepotion && this.auras.mightyragepotion.firstuse && this.auras.mightyragepotion.timer) this.auras.mightyragepotion.end();
-        if (this.auras.recklessness && this.auras.recklessness.firstuse && this.auras.recklessness.timer) this.auras.recklessness.end();
-        if (this.auras.deathwish && this.auras.deathwish.firstuse && this.auras.deathwish.timer) this.auras.deathwish.end();
-        if (this.auras.cloudkeeper && this.auras.cloudkeeper.firstuse && this.auras.cloudkeeper.timer) this.auras.cloudkeeper.end();
-        if (this.auras.flask && this.auras.flask.firstuse && this.auras.flask.timer) this.auras.flask.end();
-        if (this.auras.battlestance && this.auras.battlestance.timer) this.auras.battlestance.end();
-        if (this.auras.bloodfury && this.auras.bloodfury.firstuse && this.auras.bloodfury.timer) this.auras.bloodfury.end();
-        if (this.auras.berserking && this.auras.berserking.firstuse && this.auras.berserking.timer) this.auras.berserking.end();
-        if (this.auras.slayer && this.auras.slayer.firstuse && this.auras.slayer.timer) this.auras.slayer.end();
-        if (this.auras.spider && this.auras.spider.firstuse && this.auras.spider.timer) this.auras.spider.end();
-        if (this.auras.gabbar && this.auras.gabbar.firstuse && this.auras.gabbar.timer) this.auras.gabbar.end();
-        if (this.auras.earthstrike && this.auras.earthstrike.firstuse && this.auras.earthstrike.timer) this.auras.earthstrike.end();
-        if (this.auras.pummeler && this.auras.pummeler.firstuse && this.auras.pummeler.timer) this.auras.pummeler.end();
-        if (this.auras.swarmguard && this.auras.swarmguard.firstuse && this.auras.swarmguard.timer) this.auras.swarmguard.end();
-        if (this.auras.zandalarian && this.auras.zandalarian.firstuse && this.auras.zandalarian.timer) this.auras.zandalarian.end();
+        if (this.auras[spellclasses.MightyRagePotion] && this.auras[spellclasses.MightyRagePotion].firstuse && this.auras[spellclasses.MightyRagePotion].timer) this.auras[spellclasses.MightyRagePotion].end();
+        if (this.auras[spellclasses.Recklessness] && this.auras[spellclasses.Recklessness].firstuse && this.auras[spellclasses.Recklessness].timer) this.auras[spellclasses.Recklessness].end();
+        if (this.auras[spellclasses.DeathWish] && this.auras[spellclasses.DeathWish].firstuse && this.auras[spellclasses.DeathWish].timer) this.auras[spellclasses.DeathWish].end();
+        if (this.auras[spellclasses.Cloudkeeper] && this.auras[spellclasses.Cloudkeeper].firstuse && this.auras[spellclasses.Cloudkeeper].timer) this.auras[spellclasses.Cloudkeeper].end();
+        if (this.auras[spellclasses.Flask] && this.auras[spellclasses.Flask].firstuse && this.auras[spellclasses.Flask].timer) this.auras[spellclasses.Flask].end();
+        if (this.auras[spellclasses.BattleStance] && this.auras[spellclasses.BattleStance].timer) this.auras[spellclasses.BattleStance].end();
+        if (this.auras[spellclasses.BloodFury] && this.auras[spellclasses.BloodFury].firstuse && this.auras[spellclasses.BloodFury].timer) this.auras[spellclasses.BloodFury].end();
+        if (this.auras[spellclasses.Berserking] && this.auras[spellclasses.Berserking].firstuse && this.auras[spellclasses.Berserking].timer) this.auras[spellclasses.Berserking].end();
+        if (this.auras[spellclasses.Slayer] && this.auras[spellclasses.Slayer].firstuse && this.auras[spellclasses.Slayer].timer) this.auras[spellclasses.Slayer].end();
+        if (this.auras[spellclasses.Spider] && this.auras[spellclasses.Spider].firstuse && this.auras[spellclasses.Spider].timer) this.auras[spellclasses.Spider].end();
+        if (this.auras[spellclasses.Gabbar] && this.auras[spellclasses.Gabbar].firstuse && this.auras[spellclasses.Gabbar].timer) this.auras[spellclasses.Gabbar].end();
+        if (this.auras[spellclasses.Earthstrike] && this.auras[spellclasses.Earthstrike].firstuse && this.auras[spellclasses.Earthstrike].timer) this.auras[spellclasses.Earthstrike].end();
+        if (this.auras[spellclasses.Pummeler] && this.auras[spellclasses.Pummeler].firstuse && this.auras[spellclasses.Pummeler].timer) this.auras[spellclasses.Pummeler].end();
+        if (this.auras[spellclasses.Swarmguard] && this.auras[spellclasses.Swarmguard].firstuse && this.auras[spellclasses.Swarmguard].timer) this.auras[spellclasses.Swarmguard].end();
+        if (this.auras[spellclasses.Zandalarian] && this.auras[spellclasses.Zandalarian].firstuse && this.auras[spellclasses.Zandalarian].timer) this.auras[spellclasses.Zandalarian].end();
 
         if (this.mh.windfury && this.mh.windfury.timer) this.mh.windfury.end();
         if (this.trinketproc1 && this.trinketproc1.spell && this.trinketproc1.spell.timer) this.trinketproc1.spell.end();
         if (this.trinketproc2 && this.trinketproc2.spell && this.trinketproc2.spell.timer) this.trinketproc2.spell.end();
         if (this.attackproc && this.attackproc.spell && this.attackproc.spell.timer) this.attackproc.spell.end();
 
-        if (this.auras.flurry && this.auras.flurry.timer) this.auras.flurry.end();
+        if (this.auras[spellclasses.Flurry] && this.auras[spellclasses.Flurry].timer) this.auras[spellclasses.Flurry].end();
 
     }
     rollweapon(weapon) {
@@ -628,14 +628,14 @@ export class Player {
 
         if (this.nextswinghs) {
             this.nextswinghs = false;
-            if (this.spells.heroicstrike && this.spells.heroicstrike.cost <= this.rage) {
-                result = this.rollspell(this.spells.heroicstrike);
-                spell = this.spells.heroicstrike;
+            if (this.spells[spellclasses.HeroicStrike] && this.spells[spellclasses.HeroicStrike].cost <= this.rage) {
+                result = this.rollspell(this.spells[spellclasses.HeroicStrike]);
+                spell = this.spells[spellclasses.HeroicStrike];
                 this.rage -= spell.cost;
             }
-            else if (this.spells.heroicstrikeexecute && this.spells.heroicstrikeexecute.cost <= this.rage) {
-                result = this.rollspell(this.spells.heroicstrikeexecute);
-                spell = this.spells.heroicstrikeexecute;
+            else if (this.spells[spellclasses.HeroicStrikeExecute] && this.spells[spellclasses.HeroicStrikeExecute].cost <= this.rage) {
+                result = this.rollspell(this.spells[spellclasses.HeroicStrikeExecute]);
+                spell = this.spells[spellclasses.HeroicStrikeExecute];
                 this.rage -= spell.cost;
             }
             else {
@@ -743,8 +743,8 @@ export class Player {
         }
     }
     proccrit() {
-        if (this.auras.flurry) this.auras.flurry.use();
-        if (this.auras.deepwounds) this.auras.deepwounds.use();
+        if (this.auras[spellclasses.Flurry]) this.auras[spellclasses.Flurry].use();
+        if (this.auras[spellclasses.DeepWounds]) this.auras[spellclasses.DeepWounds].use();
     }
     procattack(spell, weapon, result) {
         let procdmg = 0;
@@ -760,7 +760,7 @@ export class Player {
                 if (weapon.proc2.spell) weapon.proc2.spell.use();
                 if (weapon.proc2.magicdmg) procdmg += this.magicproc(weapon.proc2);
             }
-            if (weapon.windfury && !this.auras.windfury.timer && rng10k() < 2000) {
+            if (weapon.windfury && !this.auras[spellclasses.Windfury].timer && rng10k() < 2000) {
                 weapon.windfury.use();
             }
             if (this.trinketproc1 && rng10k() < this.trinketproc1.chance) {
@@ -788,19 +788,19 @@ export class Player {
                     //if (log) this.log(`Sword talent proc`);
                 }
             }
-            if (this.auras.swarmguard && this.auras.swarmguard.timer && rng10k() < this.auras.swarmguard.chance) {
-                this.auras.swarmguard.proc();
+            if (this.auras[spellclasses.Swarmguard] && this.auras[spellclasses.Swarmguard].timer && rng10k() < this.auras[spellclasses.Swarmguard].chance) {
+                this.auras[spellclasses.Swarmguard].proc();
             }
-            if (this.auras.zandalarian && this.auras.zandalarian.timer) {
-                this.auras.zandalarian.proc();
+            if (this.auras[spellclasses.Zandalarian] && this.auras[spellclasses.Zandalarian].timer) {
+                this.auras[spellclasses.Zandalarian].proc();
             }
             if (this.dragonbreath && rng10k() < 400) {
                 procdmg += this.magicproc({ magicdmg: 60, coeff: 1 });
             }
         }
         if (!spell || spell instanceof spellclasses.HeroicStrike || spell instanceof spellclasses.HeroicStrikeExecute) {
-            if (this.auras.flurry && this.auras.flurry.stacks)
-                this.auras.flurry.proc();
+            if (this.auras[spellclasses.Flurry] && this.auras[spellclasses.Flurry].stacks)
+                this.auras[spellclasses.Flurry].proc();
             if (this.mh.windfury && this.mh.windfury.stacks)
                 this.mh.windfury.proc();
         }

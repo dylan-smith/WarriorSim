@@ -19,6 +19,17 @@ gulp.task('js', function () {
         .pipe(gulp.dest('dist/js'))
 });
 
+gulp.task('bundle-tests', function () {
+    return gulp.src(['js/classes/**/*.js', 'js/data/**/*.js', 'tests/**/*.js'])
+        .pipe(webpack({
+            mode: 'production',
+            output: {
+                filename: 'tests.min.js'
+            }
+        }))
+        .pipe(gulp.dest('dist/tests'))
+});
+
 gulp.task('sass', function () {
     return gulp.src('scss/style.scss')
         .pipe(sass())
@@ -58,8 +69,16 @@ gulp.task('browser', function () {
     });
 });
 
+gulp.task('browser-prod', function () {
+    browser.init({
+        server: {
+            baseDir: "./dist/"
+        }
+    });
+});
+
 gulp.task("html", ["sass", "js", "libs", "theme"], function () {
-    let sources = gulp.src(["./dist/**/*.js", "./dist/css/style.css"], { read: false });
+    let sources = gulp.src(["./dist/js/**/*.js", "./dist/css/style.css"], { read: false });
 
     return gulp.src("index.html")
         .pipe(inject(sources, { ignorePath: 'dist/', addRootSlash: false }))
@@ -71,3 +90,5 @@ gulp.task("html", ["sass", "js", "libs", "theme"], function () {
 gulp.task("build", ["sass", "js", "img", "libs", "theme", "html"]);
 
 gulp.task('default', ['build', 'watch', 'browser']);
+
+gulp.task('prod', ['build', 'watch', 'browser-prod']);

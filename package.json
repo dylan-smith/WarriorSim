@@ -26,8 +26,10 @@
   },
   "scripts": {
     "test": "jest",
+    "test-prod": "gulp bundle-tests && jest --testMatch=\"**/tests/*.js\" --testPathPattern=\"dist/tests/tests.min.js\" --noStackTrace",
     "build": "gulp build",
-    "gulp": "gulp"
+    "gulp": "gulp",
+    "prod": "gulp prod"
   },
   "author": "",
   "license": "ISC"

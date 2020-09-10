@@ -1,4 +1,4 @@
-import * as spell from './spell.js';
+import * as spellclasses from './spell.js';
 import { buffs } from '../data/buffs.js';
 import { rng } from './utility.js';
 import { SpellFactory } from '../data/spells.js';
@@ -47,8 +47,8 @@ export class Weapon {
             if (item.coeff) this.proc1.coeff = parseInt(item.coeff);
             if (item.procextra) this.proc1.extra = item.procextra;
             if (item.procspell) {
-               player.auras[item.procspell.name.toLowerCase()] = SpellFactory(player, item.procspell);
-               this.proc1.spell = player.auras[item.procspell.name.toLowerCase()];
+               player.auras[item.procspell] = SpellFactory(player, item.procspell);
+               this.proc1.spell = player.auras[item.procspell];
             }
         }
         
@@ -57,12 +57,12 @@ export class Weapon {
             this.proc2.chance = ~~(this.speed * enchant.ppm / 0.006);
             if (enchant.magicdmg) this.proc2.magicdmg = enchant.magicdmg;
             if (enchant.procspell && !offhand) {
-                player.auras.crusader1 = SpellFactory(this.player, spell.Crusader);
+                player.auras.crusader1 = SpellFactory(this.player, spellclasses.Crusader);
                 player.auras.crusader1.name = 'Crusader (MH)';
                 this.proc2.spell = player.auras.crusader1;
             }
             if (enchant.procspell && offhand) {
-                player.auras.crusader2 = SpellFactory(this.player, spell.Crusader);
+                player.auras.crusader2 = SpellFactory(this.player, spellclasses.Crusader);
                 player.auras.crusader2.name = 'Crusader (OH)';
                 this.proc2.spell = player.auras.crusader2;
             }
@@ -70,8 +70,8 @@ export class Weapon {
 
         for (let buff of buffs) {
             if (buff.id == 10614 && buff.active && !this.offhand) {
-                this.player.auras.windfury = SpellFactory(this.player, spell.Windfury);
-                this.windfury = this.player.auras.windfury;
+                this.player.auras[spellclasses.Windfury] = SpellFactory(this.player, spellclasses.Windfury);
+                this.windfury = this.player.auras[spellclasses.Windfury];
             }
         }
 
