@@ -117,7 +117,7 @@ export class Player {
         this.talents = {};
         for (let tree in talents) {
             for (let talent of talents[tree].t) {
-                Object.assign(this.talents, talent.aura(talent.c));
+                this.talents = Object.assign(this.talents, talent.aura(talent.c));
             }
         }
     }
@@ -238,8 +238,12 @@ export class Player {
                 if ((this.testTempEnchType == type && this.testTempEnch == item.id) ||
                     (this.testTempEnchType != type && item.selected)) {
 
-                    for (let prop in this.base)
-                        this.base[prop] += item[prop] || 0;
+                    for (let prop in this.base) {
+                        if (prop == 'haste')
+                            this.base.haste *= (1 + item.haste / 100) || 1;
+                        else
+                            this.base[prop] += item[prop] || 0;
+                    }
                 }
             }
         }
@@ -296,6 +300,13 @@ export class Player {
                 this.base.strmod *= (1 + buff.strmod / 100) || 1;
                 this.base.dmgmod *= (1 + buff.dmgmod / 100) || 1;
                 this.base.haste *= (1 + buff.haste / 100) || 1;
+
+                if (buff.group == "blessingmight" && this.aqbooks)
+                    this.base.ap += 36;
+                if (buff.group == "graceair" && this.aqbooks)
+                    this.base.agi += 10;
+                if (buff.group == "strengthearth" && this.aqbooks)
+                    this.base.str += 16;
             }
         }
     }
@@ -334,8 +345,8 @@ export class Player {
     }
     update() {
         this.updateAuras();
+        this.updateArmorReduction();
         this.mh.glanceChance = this.getGlanceChance(this.mh);
-        this.armorReduction = this.getArmorReduction();
         this.mh.miss = this.getMissChance(this.mh);
         this.mh.dwmiss = this.mh.miss;
         this.mh.dodge = this.getDodgeChance(this.mh);
@@ -367,13 +378,11 @@ export class Player {
 
         if (this.stats.apmod != 1)
             this.stats.ap += ~~((this.base.aprace + this.stats.str * 2) * (this.stats.apmod - 1));
-        if (this.stats.haste > 2) 
-            this.stats.haste = 2;
     }
     updateStrength() {
         this.stats.str = this.base.str;
         this.stats.ap = this.base.ap;
-            
+        
         for (let name in this.auras) {
             if (this.auras[name].timer) {
                 if (this.auras[name].stats.str)
@@ -413,7 +422,6 @@ export class Player {
             this.stats.haste *= (1 + this.auras[spellclasses.Pummeler].mult_stats.haste / 100);
         if (this.auras[spellclasses.Spider] && this.auras[spellclasses.Spider].timer)
             this.stats.haste *= (1 + this.auras[spellclasses.Spider].mult_stats.haste / 100);
-        if (this.stats.haste > 2) this.stats.haste = 2;
     }
     updateBonusDmg() {
         let bonus = 0;
@@ -429,6 +437,8 @@ export class Player {
         this.target.armor = this.target.basearmor;
         if (this.auras[spellclasses.Annihilator] && this.auras[spellclasses.Annihilator].timer)
             this.target.armor = Math.max(this.target.armor - (this.auras[spellclasses.Annihilator].stacks * this.auras[spellclasses.Annihilator].armor), 0);
+        if (this.auras[spellclasses.Rivenspike] && this.auras[spellclasses.Rivenspike].timer)
+            this.target.armor = Math.max(this.target.armor - (this.auras[spellclasses.Rivenspike].stacks * this.auras[spellclasses.Rivenspike].armor), 0);
         if (this.auras[spellclasses.Bonereaver] && this.auras[spellclasses.Bonereaver].timer)
             this.target.armor = Math.max(this.target.armor - (this.auras[spellclasses.Bonereaver].stacks * this.auras[spellclasses.Bonereaver].armor), 0);
         if (this.auras[spellclasses.Swarmguard] && this.auras[spellclasses.Swarmguard].timer)
@@ -810,6 +820,7 @@ export class Player {
         let mod = 1;
         let miss = 1700;
         let dmg = proc.magicdmg;
+        if (proc.gcd && this.timer && this.timer < 1500) return 0;
         if (proc.binaryspell) miss = this.target.binaryresist;
         else mod *= this.target.mitigation;
         if (rng10k() < miss) return 0;
@@ -828,6 +839,14 @@ export class Player {
         let crit = this.crit + this.mh.crit;
         if (roll < (crit * 100)) dmg *= 2;
         return dmg * this.stats.dmgmod * this.mh.modifier;
+    }
+    serializeStats() {
+        return {
+            auras: this.auras,
+            spells: this.spells,
+            mh: this.mh,
+            oh: this.oh,
+        };
     }
     log(msg) {
         console.log(`${step.toString().padStart(5,' ')} | ${this.rage.toFixed(2).padStart(6,' ')} | ${msg}`);

@@ -2,7 +2,7 @@ import { spells } from '../data/spells.js';
 import * as spellclasses from './spell.js';
 import { step, rng, incrementStep, resetStep, enableLogging, disableLogging, log } from './utility.js';
 
-export var version = 3;
+export var version = 4;
 
 export class Simulation {
     constructor(player, callback_finished, callback_update, options) {
@@ -35,11 +35,35 @@ export class Simulation {
         if (this.iterations == 1) enableLogging()
         else disableLogging();
     }
-    start() {
-        this.run(1);
+    startSync() {
         this.starttime = new Date().getTime();
+        let iteration;
+        for (iteration = 1; iteration < this.iterations; ++iteration) {
+            this.run();
+            if (iteration % this.maxcallstack == 0) {
+                this.update(iteration);
+            }
+        }
+        this.endtime = new Date().getTime();
+        this.finished();
     }
-    run(iteration) {
+    startAsync() {
+        this.starttime = new Date().getTime();
+        this.runAsync(1);
+    }
+    runAsync(iteration) {
+        this.run();
+        if (iteration == this.iterations) {
+            this.endtime = new Date().getTime();
+            this.finished();
+        } else if (iteration % this.maxcallstack == 0) {
+            this.update(iteration);
+            setTimeout(() => this.runAsync(iteration + 1), 0);
+        } else {
+            this.runAsync(iteration + 1);
+        }
+    }
+    run() {
         resetStep();
         this.idmg = 0;
         let player = this.player;
@@ -262,22 +286,27 @@ export class Simulation {
         dps = Math.round(dps);
         if (!this.spread[dps]) this.spread[dps] = 1;
         else this.spread[dps]++;
-
-        if (iteration == this.iterations) {
-            this.endtime = new Date().getTime();
-            if (this.cb_finished)
-                this.cb_finished();
+    }
+    update(iteration) {
+        if (this.cb_update) {
+            this.cb_update(iteration, {
+                iterations: this.iterations,
+                totaldmg: this.totaldmg,
+                totalduration: this.totalduration,
+            });
         }
-        else if (iteration % this.maxcallstack == 0) {
-            let view = this;
-            if (this.cb_update)
-                this.cb_update(iteration);
-            setTimeout(function () { view.run(iteration + 1); }, 0);
-        }
-        else {
-            this.run(iteration + 1);
+    }
+    finished() {
+        if (this.cb_finished) {
+            this.cb_finished({
+                iterations: this.iterations,
+                totaldmg: this.totaldmg,
+                totalduration: this.totalduration,
+                mindps: this.mindps,
+                maxdps: this.maxdps,
+                starttime: this.starttime,
+                endtime: this.endtime,
+            });
         }
     }
 }
-
-

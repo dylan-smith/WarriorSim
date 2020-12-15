@@ -80,7 +80,7 @@ test('system test', () => {
 
     var p = new Player();
 
-    expect(p.stats.ap).toBe(1892);
+    expect(p.stats.ap).toBe(1928);
     expect(p.stats.str).toBe(491);
     expect(p.stats.agi).toBe(239);
     expect(p.stats.hit).toBe(9);
@@ -97,8 +97,8 @@ test('system test', () => {
     expect((p.stats.haste * 100).toFixed(2)).toBe("100.00");
 
     var s = new Simulation(p);
-    s.start();
+    s.startSync();
 
-    expect(s.totaldmg).toBe(535005);
-    expect(Math.round(s.totaldmg / s.totalduration)).toBe(956);
+    expect(s.totaldmg).toBe(5252758);
+    expect(Math.round(s.totaldmg / s.totalduration)).toBe(977);
 })

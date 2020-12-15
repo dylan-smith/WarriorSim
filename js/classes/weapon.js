@@ -46,6 +46,7 @@ export class Weapon {
             if (item.binaryspell) this.proc1.binaryspell = item.binaryspell;
             if (item.coeff) this.proc1.coeff = parseInt(item.coeff);
             if (item.procextra) this.proc1.extra = item.procextra;
+            if (item.procgcd) this.proc1.gcd = item.procgcd;
             if (item.procspell) {
                player.auras[item.procspell] = SpellFactory(player, item.procspell);
                this.proc1.spell = player.auras[item.procspell];

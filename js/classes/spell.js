@@ -648,6 +648,7 @@ export class Zeal extends Aura {
         this.stats = { bonusdmg: 10 };
     }
     use() {
+        if (this.player.timer && this.player.timer < 1500) return;
         if (this.timer) this.uptime += (step - this.starttimer);
         this.timer = step + this.duration * 1000;
         this.starttimer = step;
@@ -674,6 +675,32 @@ export class Annihilator extends Aura {
     }
     use() {
         if (rng10k() < this.player.target.binaryresist) return;
+        if (this.timer) this.uptime += (step - this.starttimer);
+        this.timer = step + this.duration * 1000;
+        this.starttimer = step;
+        this.stacks = this.stacks > 2 ? 3 : this.stacks + 1;
+        this.player.updateArmorReduction();
+        //if (log) this.player.log(`${this.name} applied`);
+    }
+    step() {
+        if (step >= this.timer) {
+            this.uptime += (this.timer - this.starttimer);
+            this.timer = 0;
+            this.firstuse = false;
+            this.player.updateArmorReduction();
+            //if (log) this.player.log(`${this.name} removed`);
+        }
+    }
+}
+
+export class Rivenspike extends Aura {
+    constructor(player) {
+        super(player);
+        this.duration = 30;
+        this.armor = 200;
+        this.stacks = 0;
+    }
+    use() {
         if (this.timer) this.uptime += (step - this.starttimer);
         this.timer = step + this.duration * 1000;
         this.starttimer = step;

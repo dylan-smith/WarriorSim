@@ -372,6 +372,16 @@ export var gear = {
          "source": "Dungeon",
          "phase": 1,
          "id": 12929
+      },
+      {
+         "name": "Pendant of the Qiraji Guardian",
+         "sta": 17,
+         "str": 12,
+         "agi": 11,
+         "defense": 6,
+         "phase": 5,
+         "source": "AQ40",
+         "id": 21700
       }
    ],
    "shoulder": [
@@ -426,6 +436,16 @@ export var gear = {
          "source": "ZG",
          "phase": 4,
          "id": 19878
+      },
+      {
+         "name": "Chitinous Shoulderguards",
+         "str": 11,
+         "sta": 7,
+         "agi": 25,
+         "ac": 151,
+         "source": "AQ20",
+         "phase": 5,
+         "id": 21474
       },
       {
          "name": "Conqueror's Spaulders",
@@ -806,6 +826,15 @@ export var gear = {
          "source": "ZG",
          "phase": 4,
          "id": 22712
+      },
+      {
+         "name": "Shifting Cloak",
+         "sta": 8,
+         "agi": 17,
+         "dodge": 1,
+         "ac": 48,
+         "source": "Crafting",
+         "id": 18511
       }
    ],
    "chest": [
@@ -2734,7 +2763,14 @@ export var gear = {
          "source": "Naxx",
          "phase": "6",
          "id": 23041,
-      }
+      },
+      {
+         "name": "Mark of the Champion (vs Undead)",
+         "ap": 150,
+         "source": "Naxx",
+         "phase": "6",
+         "id": 23206
+      },
    ],
    "trinket2": [
       {
@@ -3144,6 +3180,18 @@ export var gear = {
          "procspell": spells.Annihilator
       },
       {
+         "name": "Rivenspike",
+         "mindmg": 77,
+         "maxdmg": 144,
+         "speed": 2.9,
+         "type": "Axe",
+         "source": "Dungeon",
+         "ppm": 1,
+         "phase": 1,
+         "id": 13286,
+         "procspell": spells.Rivenspike
+      },
+      {
          "name": "Axe of the Deep Woods",
          "Mainhand": true,
          "mindmg": 78,
@@ -3154,7 +3202,8 @@ export var gear = {
          "ppm": 0.8,
          "phase": 1,
          "id": 811,
-         "magicdmg": 108
+         "magicdmg": 108,
+         "procgcd": true,
       },
       {
          "name": "Blessed Qiraji War Axe",
@@ -3215,7 +3264,8 @@ export var gear = {
          "ppm": 0.8,
          "phase": 1,
          "id": 17068,
-         "magicdmg": 138
+         "magicdmg": 138,
+         "procgcd": true,
       },
       {
          "name": "Doom's Edge",
@@ -3522,7 +3572,8 @@ export var gear = {
          "phase": 1,
          "id": 17071,
          "magicdmg": 82,
-         "binaryspell": true
+         "binaryspell": true,
+         "procgcd": true
       },
       {
          "name": "Harbinger of Doom",
@@ -3805,7 +3856,8 @@ export var gear = {
          "ppm": 0.4,
          "phase": 3,
          "id": 19170,
-         "magicdmg": 220
+         "magicdmg": 220,
+         "procgcd": true,
       },
       {
          "name": "Empyrean Demolisher",
@@ -4471,7 +4523,8 @@ export var gear = {
          "ppm": 0.8,
          "phase": 1,
          "id": 17068,
-         "magicdmg": 138
+         "magicdmg": 138,
+         "procgcd": true,
       },
       {
          "name": "Doom's Edge",
@@ -4568,7 +4621,7 @@ export var gear = {
          "speed": 2.5,
          "type": "Axe",
          "source": "Other",
-         "phase": 5,
+         "phase": 4,
          "id": 20675
       },
       {
@@ -4768,7 +4821,8 @@ export var gear = {
          "phase": 1,
          "id": 17071,
          "magicdmg": 82,
-         "binaryspell": true
+         "binaryspell": true,
+         "procgcd": true
       },
       {
          "name": "Harbinger of Doom",
@@ -4931,7 +4985,8 @@ export var gear = {
          "ppm": 1,
          "phase": 4,
          "id": 19910,
-         "magicdmg": 77
+         "magicdmg": 77,
+         "procgcd": true
       },
       {
          "name": "Claw of the Frost Wyrm",
@@ -5024,7 +5079,8 @@ export var gear = {
          "ppm": 0.4,
          "phase": 3,
          "id": 19170,
-         "magicdmg": 220
+         "magicdmg": 220,
+         "procgcd": true,
       },
       {
          "name": "R14 Hammer",
@@ -5442,6 +5498,18 @@ export var gear = {
          "id": 18683,
          "str": 7,
          "sta": 12,
+      },
+      {
+         "name": "Rivenspike",
+         "mindmg": 77,
+         "maxdmg": 144,
+         "speed": 2.9,
+         "type": "Axe",
+         "source": "Dungeon",
+         "ppm": 1,
+         "phase": 1,
+         "id": 13286,
+         "procspell": spells.Rivenspike
       }
    ],
    "twohand": [
@@ -5757,7 +5825,7 @@ export var gear = {
          "phase": 4,
          "type": "Mace",
          "physdmg": 210,
-         "ppm": 1,
+         "ppm": 4,
       },
       {
          "name": "Might of Menethil",
@@ -5795,6 +5863,7 @@ export var gear = {
          "type": "Mace",
          "ppm": 0.7,
          "magicdmg": 333,
+         "procgcd": true
       },
       {
          "name": "Sulfuron Hammer",
@@ -5807,6 +5876,7 @@ export var gear = {
          "type": "Mace",
          "ppm": 1,
          "magicdmg": 101,
+         "procgcd": true
       },
       {
          "name": "The Unstoppable Force",
@@ -6721,6 +6791,13 @@ export var enchant = {
          "name": "Superior Impact",
          "bonusdmg": 9,
          "phase": 1
+      },
+      {
+         "id": 6043,
+         "name": "Iron Counterweight",
+         "haste": 3,
+         "phase": 1,
+         "temp": true,
       },
    ],
 };

@@ -3,8 +3,10 @@ import { talents } from './data/talents.js';
 import { buffs } from './data/buffs.js';
 import { spells } from './data/spells.js';
 import { gear, enchant, sets } from './data/gear.js';
-import { version, Simulation } from './classes/simulation.js';
+import { version } from './classes/simulation.js';
+import { SimulationWorker } from './classes/simulationworker.js';
 import { Player } from './classes/player.js';
+import { updateGlobals } from './globals.js';
 
 export var UI = {
 
@@ -68,21 +70,21 @@ export var UI = {
         view.body.on('click', '.js-table', function(e) {
             e.preventDefault();
             view.disableEditMode();
-            let first = view.tcontainer.find('table.gear tbody tr').first();
-            view.tcontainer.find('table.gear tbody tr').addClass('waiting');
+            const rows = view.tcontainer.find('table.gear tbody tr');
+            rows.addClass('waiting');
             view.tcontainer.find('table.gear tbody tr td:last-of-type').html('');
             view.startLoading();
-            view.simulateDPS(first);
+            view.simulateDPS(rows);
         });
 
         view.main.on('click', '.js-enchant', function(e) {
             e.preventDefault();
             view.disableEditMode();
-            let first = view.tcontainer.find('table.enchant tbody tr').first();
-            view.tcontainer.find('table.enchant tbody tr').addClass('waiting');
+            const rows = view.tcontainer.find('table.enchant tbody tr');
+            rows.addClass('waiting');
             view.tcontainer.find('table.enchant tbody tr td:last-of-type').html('');
             view.startLoading();
-            view.simulateDPS(first);
+            view.simulateDPS(rows);
         });
 
         view.main.on('click', '.js-editmode', function(e) {
@@ -188,7 +190,7 @@ export var UI = {
             view.loadGear(type, false);
     },
 
-    simulateDPS: function(row) {
+    simulateDPS: function(rows) {
         let view = this;
         let dps = view.sidebar.find('#dps');
         let stats = view.sidebar.find('#stats');
@@ -196,7 +198,8 @@ export var UI = {
         let btn = view.sidebar.find('.js-dps');
         dps.text('');
         time.text('');
-        var options = {
+
+        const player_options = {
             aqbooks: $('select[name="aqbooks"]').val() == "Yes", 
             weaponrng: $('select[name="weaponrng"]').val() == "Yes",
             spelldamage: parseInt($('input[name="spelldamage"]').val()),
@@ -204,51 +207,85 @@ export var UI = {
             targetarmor: parseInt($('input[name="targetarmor"]').val()),
             targetresistance: parseInt($('input[name="targetresistance"]').val()),
             racename: $('select[name="race"]').val()
-        }
-        var player = new Player(null, null, null, options);
-        if (row) {
-            let type = row.parents('table').data('type');
+        };
+
+        const sim_options = {
+            timesecsmin: parseInt($('input[name="timesecsmin"]').val()),
+            timesecsmax: parseInt($('input[name="timesecsmax"]').val()),
+            executeperc: parseInt($('input[name="executeperc"]').val()),
+            startrage: parseInt($('input[name="startrage"]').val()),
+            simulations: parseInt($('input[name="simulations"]').val())
+        };
+
+        const params = {
+            player: [undefined, undefined, undefined, player_options],
+            sim: sim_options,
+            fullreport: true,
+        };
+        
+        if (rows) {
+            let type = rows.parents('table').data('type');
             if (type == "finger" || type == "trinket" || type == "custom")
-                player = new Player(null, type, null, options);
+                params.player = [null, type, undefined, player_options];
         }
+        var player = new Player(...params.player);
         if (!player.mh) {
             view.addAlert('No weapon selected');
             view.endLoading();
             return;
         }
-        var sim = new Simulation(player, 
-            () => {
+        var sim = new SimulationWorker( 
+            (report) => {
                 // Finished
-                dps.text((sim.totaldmg / sim.totalduration).toFixed(2));
-                time.text((sim.endtime - sim.starttime) / 1000);
-                stats.html(sim.mindps.toFixed(2) + ' min&nbsp;&nbsp;&nbsp;&nbsp;' + sim.maxdps.toFixed(2) + ' max');
+                dps.text((report.totaldmg / report.totalduration).toFixed(2));
+                time.text((report.endtime - report.starttime) / 1000);
+                stats.html(report.mindps.toFixed(2) + ' min&nbsp;&nbsp;&nbsp;&nbsp;' + report.maxdps.toFixed(2) + ' max');
                 btn.css('background', '');
-                if (row) view.simulateRow(row);
+                if (rows) view.simulateRows(Array.from(rows));
                 else view.endLoading();
 
-                STATS.initCharts(sim);
+                STATS.initCharts(report);
                 sim = null;
                 player = null;
                 
             },
-            (iteration) => {
+            (iteration, report) => {
                 // Update
-                let perc = parseInt(iteration / sim.iterations * 100);
-                dps.text((sim.totaldmg / sim.totalduration).toFixed(2));
+                let perc = parseInt(iteration / report.iterations * 100);
+                dps.text((report.totaldmg / report.totalduration).toFixed(2));
                 btn.css('background', 'linear-gradient(to right, transparent ' + perc + '%, #444 ' + perc + '%)');
             }, 
-            {
-                timesecsmin: parseInt($('input[name="timesecsmin"]').val()),
-                timesecsmax: parseInt($('input[name="timesecsmax"]').val()),
-                executeperc: parseInt($('input[name="executeperc"]').val()),
-                startrage: parseInt($('input[name="startrage"]').val()),
-                simulations: parseInt($('input[name="simulations"]').val())
-            }
+            (error) => {
+                dps.text('ERROR');
+                console.error(error);
+            },
         );
-        sim.start();
+        sim.start(params);
     },
 
-    simulateRow: function(tr) {
+    simulateRows: function(rows) {
+        var view = this;
+        var btn = view.sidebar.find('.js-table');
+
+        const status = rows.map(() => 0);
+        const updateFn = (index, rowPerc) => {
+            status[index] = rowPerc;
+            const perc = Math.floor(status.reduce((a, b) => a + b, 0) / status.length);
+            if (perc == 100) {
+                btn.css('background', '');
+                view.endLoading();
+                view.updateSession();
+            } else {
+                btn.css('background', 'linear-gradient(to right, transparent ' + perc + '%, #444 ' + perc + '%)');
+            }
+        };
+
+        for (const [index, row] of rows.entries()) {
+            this.simulateRow($(row), (rowPerc) => updateFn(index, rowPerc));
+        }
+    },
+
+    simulateRow: function(tr, updateFn) {
         var view = this;
         var dps = tr.find('td:last-of-type');
         var type = tr.parents('table').data('type');
@@ -256,11 +293,8 @@ export var UI = {
         var isench = tr.parents('table').hasClass('enchant');
         var istemp = tr.data('temp') == true;
         var base = parseFloat(view.sidebar.find('#dps').text());
-        var rows = tr.siblings().length + 1;
-        var rowsdone = tr.siblings(':not(.waiting)').length;
-        var btn = view.sidebar.find('.js-table');
 
-        var options = {
+        const player_options = {
             aqbooks: $('select[name="aqbooks"]').val() == "Yes", 
             weaponrng: $('select[name="weaponrng"]').val() == "Yes",
             spelldamage: parseInt($('input[name="spelldamage"]').val()),
@@ -268,14 +302,26 @@ export var UI = {
             targetarmor: parseInt($('input[name="targetarmor"]').val()),
             targetresistance: parseInt($('input[name="targetresistance"]').val()),
             racename: $('select[name="race"]').val()
-        }
+        };
 
-        var player = new Player(item, type, istemp ? 2 : isench ? 1 : 0, options);
-        var sim = new Simulation(player, 
-            () => {
+        const sim_options = {
+            timesecsmin: parseInt($('input[name="timesecsmin"]').val()),
+            timesecsmax: parseInt($('input[name="timesecsmax"]').val()),
+            executeperc: parseInt($('input[name="executeperc"]').val()),
+            startrage: parseInt($('input[name="startrage"]').val()),
+            simulations: parseInt($('input[name="simulations"]').val())
+        };
+
+        const params = {
+            player: [item, type, istemp ? 2 : isench ? 1 : 0, player_options],
+            sim: sim_options,
+        };
+
+        var sim = new SimulationWorker( 
+            (report) => {
                 // Finished
                 let span = $('<span></span>');
-                let calc = sim.totaldmg / sim.totalduration;
+                let calc = report.totaldmg / report.totalduration;
                 let diff = calc - base;
                 span.text(diff.toFixed(2));
                 if (diff >= 0) span.addClass('p');
@@ -290,11 +336,8 @@ export var UI = {
                 });
                 
                 tr.removeClass('waiting');
-                let perc = parseInt(((rowsdone + 1) * sim.iterations) / (sim.iterations * rows) * 100);
-                if (perc == 100) btn.css('background', '');
-                else btn.css('background', 'linear-gradient(to right, transparent ' + perc + '%, #444 ' + perc + '%)');
+                updateFn(100);
                 sim = null;
-                player = null;
 
                 if (isench) {
                     for(let i of enchant[type])
@@ -306,26 +349,18 @@ export var UI = {
                         if (i.id == item)
                             i.dps = calc.toFixed(2);
                 }
-
-                let next = view.tcontainer.find('tbody tr.waiting').first();
-                if (next.length) view.simulateRow(next);
-                else { view.endLoading(); view.updateSession(); }
             },
-            (iteration) => {
+            (iteration, report) => {
                 // Update
-                let perc = parseInt((rowsdone * sim.iterations + iteration) / (sim.iterations * rows) * 100);
-                btn.css('background', 'linear-gradient(to right, transparent ' + perc + '%, #444 ' + perc + '%)');
-                dps.text((sim.totaldmg / sim.totalduration).toFixed(2));
+                updateFn(Math.floor((iteration / report.iterations) * 100));
+                dps.text((report.totaldmg / report.totalduration).toFixed(2));
             },
-            {
-                timesecsmin: parseInt($('input[name="timesecsmin"]').val()),
-                timesecsmax: parseInt($('input[name="timesecsmax"]').val()),
-                executeperc: parseInt($('input[name="executeperc"]').val()),
-                startrage: parseInt($('input[name="startrage"]').val()),
-                simulations: parseInt($('input[name="simulations"]').val())
+            (error) => {
+                dps.text('ERROR');
+                console.error(error);
             }
         );
-        sim.start();
+        sim.start(params);
     },
 
     rowDisableItem: function(tr) {
@@ -574,52 +609,22 @@ export var UI = {
 
         view.sidebar.find('.bg').attr('data-race', view.fight.find('select[name="race"]').val());
 
-        let _buffs = !localStorage.buffs ? JSON.parse(session.buffs) : JSON.parse(localStorage.buffs);
-        let _rotation = !localStorage.rotation ? JSON.parse(session.rotation) : JSON.parse(localStorage.rotation);
+        updateGlobals({
+            talents: !localStorage.talents ? JSON.parse(session.talents) : JSON.parse(localStorage.talents),
+            buffs: !localStorage.buffs ? JSON.parse(session.buffs) : JSON.parse(localStorage.buffs),
+            rotation: !localStorage.rotation ? JSON.parse(session.rotation) : JSON.parse(localStorage.rotation),
+            gear: !localStorage.gear ? JSON.parse(session.gear) : JSON.parse(localStorage.gear),
+            enchant: !localStorage.enchant ? JSON.parse(session.enchant) : JSON.parse(localStorage.enchant),
+        });
+
         let _sources = !localStorage.sources ? JSON.parse(session.sources) : JSON.parse(localStorage.sources);
         let _phases = !localStorage.phases ? JSON.parse(session.phases) : JSON.parse(localStorage.phases);
-        let _talents = !localStorage.talents ? JSON.parse(session.talents) : JSON.parse(localStorage.talents);
-        let _gear = !localStorage.gear ? JSON.parse(session.gear) : JSON.parse(localStorage.gear);
-        let _enchant = !localStorage.enchant ? JSON.parse(session.enchant) : JSON.parse(localStorage.enchant);
-
-        for (let tree in _talents)
-            for (let talent in _talents[tree].t)
-                talents[tree].t[talent].c = _talents[tree].t[talent];
-
-        for (let i of _buffs)
-            for (let j of buffs)
-                if (i == j.id) j.active = true;
-
-        for (let i of _rotation)
-            for (let j of spells)
-                if (i.id == j.id)
-                    for (let prop in i)
-                        j[prop] = i[prop];
 
         for (let i of _sources)
             view.filter.find(`.sources [data-id="${i}"]`).addClass('active');
 
         for (let i of _phases)
             view.filter.find(`.phases [data-id="${i}"]`).addClass('active');
-
-        for (let type in _gear)
-            for (let i of _gear[type])
-                if (gear[type])
-                    for (let j of gear[type])
-                        if (i.id == j.id) {
-                            j.dps = i.dps;
-                            j.selected = i.selected;
-                            j.hidden = i.hidden;
-                        }
-
-        for (let type in _enchant)
-            for (let i of _enchant[type])
-                for (let j of enchant[type])
-                    if (i.id == j.id) {
-                        j.dps = i.dps;
-                        j.selected = i.selected;
-                        j.hidden = i.hidden;
-                    }
 
         if (!localStorage.version || parseInt(localStorage.version) < version) view.newVersion();
     },
@@ -948,6 +953,8 @@ export var UI = {
 
         if (!view.filter.find(`.phases [data-id="4"]`).hasClass('active'))
             setTimeout(() => { view.filter.find(`.phases [data-id="4"]`).click() }, 100);
+        if (!view.filter.find(`.phases [data-id="5"]`).hasClass('active'))
+            setTimeout(() => { view.filter.find(`.phases [data-id="5"]`).click() }, 100);
 
     }
     
