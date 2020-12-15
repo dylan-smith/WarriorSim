@@ -13,12 +13,13 @@
   <!-- endinject -->
 
   <!-- inject:css -->
-  <link rel="stylesheet" href="css/style.css?v=a76e7e5d189caab042b37249132ceb32">
+  <link rel="stylesheet" href="css/style.css?v=4b1ed6cc47fa1ed39f1f57422bc4ab57">
   <!-- endinject -->
 
   <!-- inject:js -->
-  <script src="js/libs.min.js?v=8c26b3b94d40edb8ca972dd2786a2e34"></script>
-  <script src="js/warriorsim.min.js?v=5410753831654ca21f3e94fa6c7d1bdb"></script>
+  <script src="js/WarriorSim.min.js?v=b37d6fed17dc7c116d00a1665da53237"></script>
+  <script src="js/libs.min.js?v=21f4d3e5fad15e6f1719b8bd540b8545"></script>
+  <script src="js/warriorsim.min.js?v=155796045322d0dd86dcd37863e7c22c"></script>
   <!-- endinject -->
 
   <script>var whTooltips = { colorLinks: true, iconizeLinks: false, renameLinks: false, "hide": { "ilvl": false } };</script>
@@ -87,10 +88,18 @@ profiles
       </ul>
     </div>
     <div class="bottom">
-      <div id="dps"></div>
+      <div id="weights-div">
+        <div id="weight-str"><span class="stat-name">Strength:</span><span class="stat-dps">12345</span><span class="stat-error">123</span></div>
+        <div id="weight-agi"><span class="stat-name">Agility:</span><span class="stat-dps">12345</span><span class="stat-error">123</span></div>
+        <div id="weight-ap"><span class="stat-name">Attack Power:</span><span class="stat-dps">12345</span><span class="stat-error">123</span></div>
+        <div id="weight-crit"><span class="stat-name">Crit Chance:</span><span class="stat-dps">12345</span><span class="stat-error">123</span></div>
+        <div id="weight-hit"><span class="stat-name">Hit Chance:</span><span class="stat-dps">12345</span><span class="stat-error">123</span></div>
+      </div>
+      <div id="dps-box"><span id="dps"></span><span id="dpserr"></span></div>
       <div id="stats"></div>
       <div id="time"></div>
       <a href="#" class="btn js-dps">DPS</a>
+      <a href="#" class="btn js-weights">STAT WEIGHTS</a>
       <a href="#" class="btn js-table">SHEET DPS</a>
       <a href="#" class="btn js-stats disabled">STATS</a>
       <a href="#" class="btn js-settings">SETTINGS</a>
