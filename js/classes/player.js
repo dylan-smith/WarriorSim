@@ -5,6 +5,7 @@ class Player {
             aqbooks: $('select[name="aqbooks"]').val() == "Yes",
             weaponrng: $('select[name="weaponrng"]').val() == "Yes",
             spelldamage: parseInt($('input[name="spelldamage"]').val()),
+            dmgbuff: parseInt($('input[name="dmgbuff"]').val()),
             target: {
                 level: parseInt($('input[name="targetlevel"]').val()),
                 basearmor: parseInt($('input[name="targetarmor"]').val()),
@@ -30,6 +31,7 @@ class Player {
         this.aqbooks = config.aqbooks;
         this.weaponrng = config.weaponrng;
         this.spelldamage = config.spelldamage;
+        this.dmgbuff = config.dmgbuff;
         this.target = config.target;
         this.base = {
             ap: 0,
@@ -356,6 +358,7 @@ class Player {
     update() {
         this.updateAuras();
         this.updateArmorReduction();
+        this.updateDmgMod();
         this.mh.glanceChance = this.getGlanceChance(this.mh);
         this.mh.miss = this.getMissChance(this.mh);
         this.mh.dwmiss = this.mh.miss;
@@ -457,6 +460,7 @@ class Player {
     }
     updateDmgMod() {
         this.stats.dmgmod = this.base.dmgmod;
+        this.stats.dmgmod += this.dmgbuff / 100;
         for (let name in this.auras) {
             if (this.auras[name].timer && this.auras[name].mult_stats.dmgmod)
                 this.stats.dmgmod *= (1 + this.auras[name].mult_stats.dmgmod / 100);

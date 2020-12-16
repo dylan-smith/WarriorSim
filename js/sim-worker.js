@@ -1,5 +1,6 @@
 if ('function' === typeof importScripts) {
     importScripts('./worker-depends.min.js');
+    //importScripts('../dist/js/worker-depends.min.js');
 
     onmessage = (event) => {
         const params = event.data;
