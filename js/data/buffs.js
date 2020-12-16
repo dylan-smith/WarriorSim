@@ -258,6 +258,14 @@ var buffs = [
       group: "vaelbuff",
    },
    {
+      id: 29232,
+      spellid: true,
+      name: "Fungal Bloom",
+      iconname: "spell_nature_unyeildingstamina",
+      group: "loathebbuff",
+      crit: 50,
+   },
+   {
       id: 12217,
       name: "Dragonbreath Chili",
       iconname: "inv_drink_17",
